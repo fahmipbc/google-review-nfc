@@ -711,6 +711,7 @@ function showRegistrationForm(data) {
                     placeholder="Buat PIN"
                     inputmode="numeric"
                     autocomplete="new-password"
+                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); verifyPin(); }"
                 >
 
                 <div class="help-text">
@@ -1230,6 +1231,7 @@ function startRedirect(data) {
                     placeholder="Masukkan PIN"
                     inputmode="numeric"
                     autocomplete="off"
+                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); verifyPin(); }"
                 >
 
 
@@ -1530,6 +1532,7 @@ function startRedirect(data) {
                         placeholder="Kosongkan jika tidak ingin mengganti PIN"
                         inputmode="numeric"
                         autocomplete="new-password"
+                        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); verifyPin(); }"
                     >
 
                     <div class="pin-description">
