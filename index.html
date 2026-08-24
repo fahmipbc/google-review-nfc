@@ -7,250 +7,263 @@
     <title>Google Review NFC</title>
 
     <style>
-        * {
-            box-sizing: border-box;
-        }
-
         body {
             margin: 0;
-            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
             display: flex;
             justify-content: center;
             align-items: center;
-            background: #ffffff;
-            font-family: Arial, sans-serif;
-            color: #333;
+            min-height: 100vh;
         }
 
         .container {
-            text-align: center;
-        }
-
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-
-        .message {
-            font-size: 15px;
-            color: #777;
-        }
-
-        .loader {
-            width: 28px;
-            height: 28px;
-            margin: 20px auto;
-            border: 3px solid #ddd;
-            border-top: 3px solid #4285f4;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        /* Tombol setting dibuat samar */
-        .settings-button {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-
-            width: 28px;
-            height: 28px;
-
-            border: none;
-            background: transparent;
-            color: #ccc;
-
-            font-size: 16px;
-            cursor: pointer;
-
-            opacity: 0.35;
-        }
-
-        .settings-button:hover {
-            opacity: 1;
-            color: #555;
-        }
-
-        /* Panel setting */
-        .settings {
-            display: none;
-
-            position: fixed;
-            top: 50px;
-            right: 10px;
-
-            width: 300px;
-            padding: 18px;
-
+            width: 90%;
+            max-width: 420px;
             background: white;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-
-            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            border-radius: 16px;
+            padding: 30px;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
 
-        .settings h3 {
+        h1 {
             margin-top: 0;
+            font-size: 24px;
         }
 
-        .settings input {
-            width: 100%;
-            padding: 9px;
-            margin: 8px 0;
+        .status {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #f1f1f1;
         }
 
-        .settings button {
-            padding: 8px 14px;
-            cursor: pointer;
+        .loading {
+            color: #666;
+        }
+
+        .success {
+            color: #1b5e20;
+            background: #e8f5e9;
+        }
+
+        .warning {
+            color: #8a6d00;
+            background: #fff8e1;
+        }
+
+        .error {
+            color: #b71c1c;
+            background: #ffebee;
+        }
+
+        .info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #666;
         }
     </style>
 </head>
 
 <body>
 
-    <div class="container">
+<div class="container">
 
-        <div class="title">
-            Google Review NFC
-        </div>
+    <h1>Google Review NFC</h1>
 
-        <div class="loader"></div>
-
-        <div class="message">
-            Mengarahkan ke Google Review...
-        </div>
-
+    <div id="status" class="status loading">
+        Menghubungkan...
     </div>
 
+    <div id="info" class="info"></div>
 
-    <!-- Tombol setting tersembunyi -->
-    <button class="settings-button"
-            onclick="openSettings()"
-            title="Settings">
-        ⚙
-    </button>
+</div>
 
+<script>
 
-    <!-- Panel setting -->
-    <div class="settings" id="settingsPanel">
+    // ==========================================
+    // KONFIGURASI
+    // ==========================================
 
-        <h3>Settings</h3>
-
-        <label>
-            Google Review URL
-        </label>
-
-        <input
-            type="text"
-            id="reviewUrl"
-            placeholder="https://g.page/r/..."
-        >
-
-        <button onclick="saveUrl()">
-            Simpan
-        </button>
-
-        <button onclick="closeSettings()">
-            Tutup
-        </button>
-
-    </div>
+    const API_URL =
+        "https://script.google.com/macros/s/AKfycbzQhbjOlI_RQBOFwk2PncIi0Ybvil0L4Z4c6ajR3J5yMFORvvnInDdkAQozZH0fx7Tj/exec";
 
 
-    <script>
+    // ==========================================
+    // AMBIL ID DARI URL
+    // ==========================================
 
-        /*
-         * ==========================================
-         * GOOGLE REVIEW URL
-         * ==========================================
-         */
+    const urlParams = new URLSearchParams(window.location.search);
 
-        const DEFAULT_REVIEW_URL =
-            "https://g.page/r/XXXXXXXXXXXX/review";
+    const plakatId = urlParams.get("id");
 
 
-        /*
-         * Waktu sebelum redirect
-         * 2000 = 2 detik
-         */
+    // ==========================================
+    // ELEMENT HTML
+    // ==========================================
 
-        const REDIRECT_DELAY = 2000;
-
-
-        /*
-         * Buka setting
-         */
-
-        function openSettings() {
-
-            document.getElementById("settingsPanel").style.display = "block";
-
-            document.getElementById("reviewUrl").value =
-                localStorage.getItem("reviewUrl") ||
-                DEFAULT_REVIEW_URL;
-        }
+    const statusElement = document.getElementById("status");
+    const infoElement = document.getElementById("info");
 
 
-        /*
-         * Tutup setting
-         */
+    // ==========================================
+    // VALIDASI ID
+    // ==========================================
 
-        function closeSettings() {
+    if (!plakatId) {
 
-            document.getElementById("settingsPanel").style.display = "none";
-        }
+        statusElement.className = "status error";
+
+        statusElement.textContent =
+            "ID plakat tidak ditemukan.";
+
+    } else {
+
+        checkPlakat();
+
+    }
 
 
-        /*
-         * Simpan URL
-         */
+    // ==========================================
+    // CEK DATA PLAKAT
+    // ==========================================
 
-        function saveUrl() {
+    async function checkPlakat() {
 
-            const url =
-                document.getElementById("reviewUrl").value.trim();
+        try {
 
-            if (!url) {
-                alert("URL Google Review belum diisi.");
+            statusElement.className = "status loading";
+
+            statusElement.textContent =
+                "Memeriksa konfigurasi plakat...";
+
+
+            const response = await fetch(
+                API_URL +
+                "?action=get&id=" +
+                encodeURIComponent(plakatId)
+            );
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "HTTP Error " + response.status
+                );
+
+            }
+
+
+            const data = await response.json();
+
+
+            console.log("Data plakat:", data);
+
+
+            // ==================================
+            // ID TIDAK DITEMUKAN
+            // ==================================
+
+            if (data.status === "not_found") {
+
+                statusElement.className =
+                    "status error";
+
+                statusElement.textContent =
+                    "Plakat tidak ditemukan.";
+
                 return;
             }
 
-            localStorage.setItem("reviewUrl", url);
 
-            alert("URL berhasil disimpan.");
+            // ==================================
+            // ERROR DARI SERVER
+            // ==================================
 
-            closeSettings();
+            if (data.status !== "success") {
+
+                throw new Error(
+                    data.message || "Server error"
+                );
+
+            }
+
+
+            // ==================================
+            // BELUM TERDAFTAR
+            // ==================================
+
+            if (!data.place_id) {
+
+                statusElement.className =
+                    "status warning";
+
+                statusElement.textContent =
+                    "Plakat belum dikonfigurasi.";
+
+                infoElement.textContent =
+                    "ID Plakat: " + data.id_plakat;
+
+                return;
+            }
+
+
+            // ==================================
+            // SUDAH TERDAFTAR
+            // ==================================
+
+            statusElement.className =
+                "status success";
+
+            statusElement.textContent =
+                "Plakat sudah terdaftar.";
+
+            infoElement.innerHTML =
+                "Usaha: <strong>" +
+                escapeHtml(data.nama_usaha) +
+                "</strong><br>" +
+                "Alamat: " +
+                escapeHtml(data.alamat);
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            statusElement.className =
+                "status error";
+
+            statusElement.textContent =
+                "Gagal menghubungi server.";
+
+            infoElement.textContent =
+                error.message;
+
         }
 
-
-        /*
-         * Ambil URL
-         */
-
-        function getReviewUrl() {
-
-            return localStorage.getItem("reviewUrl") ||
-                   DEFAULT_REVIEW_URL;
-        }
+    }
 
 
-        /*
-         * Redirect
-         */
+    // ==========================================
+    // CEGAH HTML INJECTION
+    // ==========================================
 
-        setTimeout(function() {
+    function escapeHtml(text) {
 
-            window.location.replace(getReviewUrl());
+        if (!text) return "";
 
-        }, REDIRECT_DELAY);
+        return String(text)
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
 
-    </script>
+    }
+
+</script>
 
 </body>
 </html>
