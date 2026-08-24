@@ -1414,11 +1414,9 @@ function startRedirect(data) {
 
         const response =
             await fetch(
-
                 API_URL +
                 "?action=get&id=" +
                 encodeURIComponent(plakatId)
-
             );
 
 
@@ -1451,9 +1449,7 @@ function startRedirect(data) {
             <div class="message">
 
                 <div class="setting-title">
-
                     Edit Plakat
-
                 </div>
 
 
@@ -1463,60 +1459,92 @@ function startRedirect(data) {
                 ></div>
 
 
+                <!-- NAMA USAHA -->
+
                 <div class="form-group">
 
-                    <label>
-
+                    <label for="editNama">
                         Nama usaha
-
                     </label>
 
                     <input
                         type="text"
                         id="editNama"
                         value="${escapeHtml(
-                            data.nama_usaha
+                            data.nama_usaha || ""
                         )}"
+                        autocomplete="organization"
                     >
 
                 </div>
 
 
+                <!-- ALAMAT -->
+
                 <div class="form-group">
 
-                    <label>
-
+                    <label for="editAlamat">
                         Alamat
-
                     </label>
 
                     <textarea
                         id="editAlamat"
                     >${escapeHtml(
-                        data.alamat
+                        data.alamat || ""
                     )}</textarea>
 
                 </div>
 
 
+                <!-- LINK GOOGLE MAPS -->
+
                 <div class="form-group">
 
-                    <label>
-
+                    <label for="editMaps">
                         Link Google Maps
-
                     </label>
 
                     <input
                         type="url"
                         id="editMaps"
                         value="${escapeHtml(
-                            data.maps_url
+                            data.maps_url || ""
                         )}"
+                        autocomplete="url"
                     >
 
                 </div>
 
+
+                <!-- PIN BARU -->
+
+                <div class="form-group">
+
+                    <label for="editNewPin">
+                        PIN baru
+                    </label>
+
+                    <input
+                        type="password"
+                        id="editNewPin"
+                        placeholder="Kosongkan jika tidak ingin mengganti PIN"
+                        inputmode="numeric"
+                        autocomplete="new-password"
+                    >
+
+                    <div class="pin-description">
+
+                        Kosongkan jika PIN tidak ingin
+                        diubah. Jika Anda memasukkan
+                        PIN baru, PIN lama tidak dapat
+                        digunakan lagi.
+
+                    </div>
+
+                </div>
+
+
+                <!-- TOMBOL SIMPAN -->
 
                 <button
                     class="button button-primary"
@@ -1563,13 +1591,11 @@ function startRedirect(data) {
             .value
             .trim();
 
-
     const alamat =
         document
             .getElementById("editAlamat")
             .value
             .trim();
-
 
     const mapsUrl =
         document
@@ -1577,6 +1603,16 @@ function startRedirect(data) {
             .value
             .trim();
 
+    const newPin =
+        document
+            .getElementById("editNewPin")
+            .value
+            .trim();
+
+
+    // =========================================
+    // VALIDASI DATA
+    // =========================================
 
     if (!namaUsaha) {
 
@@ -1585,7 +1621,6 @@ function startRedirect(data) {
         );
 
         return;
-
     }
 
 
@@ -1596,7 +1631,6 @@ function startRedirect(data) {
         );
 
         return;
-
     }
 
 
@@ -1607,17 +1641,68 @@ function startRedirect(data) {
         );
 
         return;
-
     }
 
 
-    /*
-     * PIN tidak kita minta lagi.
-     *
-     * Untuk tahap ini kita simpan PIN
-     * dalam session browser setelah
-     * berhasil diverifikasi.
-     */
+    // =========================================
+    // JIKA PIN BARU DIISI
+    // =========================================
+
+    if (newPin !== "") {
+
+        if (!/^\d+$/.test(newPin)) {
+
+            showEditError(
+                "PIN baru hanya boleh berisi angka."
+            );
+
+            return;
+        }
+
+
+        if (newPin.length < 4) {
+
+            showEditError(
+                "PIN baru minimal 4 angka."
+            );
+
+            return;
+        }
+
+
+        // Jangan langsung simpan.
+        // Tampilkan konfirmasi + countdown.
+
+        confirmPinChange(
+            namaUsaha,
+            alamat,
+            mapsUrl,
+            newPin
+        );
+
+        return;
+    }
+
+
+    // =========================================
+    // JIKA PIN BARU DIKOSONGKAN
+    // =========================================
+
+    saveEditToServer(
+        namaUsaha,
+        alamat,
+        mapsUrl,
+        ""
+    );
+
+}
+
+    async function saveEditToServer(
+    namaUsaha,
+    alamat,
+    mapsUrl,
+    newPin
+) {
 
     const pin =
         sessionStorage.getItem(
@@ -1628,24 +1713,11 @@ function startRedirect(data) {
     if (!pin) {
 
         showEditError(
-            "Sesi PIN sudah berakhir. Silakan masukkan PIN lagi."
+            "Sesi PIN sudah berakhir."
         );
 
         return;
-
     }
-
-
-    const button =
-        document.getElementById(
-            "editSaveButton"
-        );
-
-
-    button.disabled = true;
-
-    button.textContent =
-        "MENYIMPAN...";
 
 
     try {
@@ -1668,6 +1740,8 @@ function startRedirect(data) {
 
                     pin: pin,
 
+                    new_pin: newPin,
+
                     maps_url: mapsUrl,
 
                     nama_usaha: namaUsaha,
@@ -1685,29 +1759,41 @@ function startRedirect(data) {
 
         if (result.status === "updated") {
 
-            showEditSuccess(
-                result
+            // Kalau PIN diganti,
+            // update PIN dalam session.
+
+            if (newPin !== "") {
+
+                sessionStorage.setItem(
+                    "nfc_edit_pin_" + plakatId,
+                    newPin
+                );
+
+            }
+
+
+            window.pendingEdit = null;
+
+            showEditSuccess(result);
+
+            return;
+        }
+
+
+        if (result.status === "wrong_pin") {
+
+            showEditError(
+                "PIN lama tidak valid."
             );
 
             return;
-
         }
 
 
         showEditError(
-            result.status === "wrong_pin"
-                ? "PIN salah."
-                : (
-                    result.message ||
-                    "Gagal menyimpan."
-                )
+            result.message ||
+            "Gagal menyimpan perubahan."
         );
-
-
-        button.disabled = false;
-
-        button.textContent =
-            "SIMPAN PERUBAHAN";
 
 
     } catch (error) {
@@ -1718,16 +1804,10 @@ function startRedirect(data) {
             "Gagal menghubungi server."
         );
 
-
-        button.disabled = false;
-
-        button.textContent =
-            "SIMPAN PERUBAHAN";
-
     }
 
 }
-
+    
     function showEditError(message) {
 
     const element =
