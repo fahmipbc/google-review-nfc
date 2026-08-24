@@ -711,7 +711,7 @@ function showRegistrationForm(data) {
                     placeholder="Buat PIN"
                     inputmode="numeric"
                     autocomplete="new-password"
-                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); verifyPin(); }"
+                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); registerPlakat(); }"
                 >
 
                 <div class="help-text">
@@ -1532,7 +1532,7 @@ function startRedirect(data) {
                         placeholder="Kosongkan jika tidak ingin mengganti PIN"
                         inputmode="numeric"
                         autocomplete="new-password"
-                        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); verifyPin(); }"
+                        onkeydown="if(event.key === 'Enter'){ event.preventDefault(); saveEdit(); }"
                     >
 
                     <div class="pin-description">
@@ -1550,7 +1550,7 @@ function startRedirect(data) {
                 <!-- TOMBOL SIMPAN -->
 
                 <button
-                    class="button button-primary"
+                    
                     id="editSaveButton"
                     onclick="saveEdit()"
                 >
