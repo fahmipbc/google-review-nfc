@@ -1706,7 +1706,6 @@ function startRedirect(data) {
             "nfc_edit_pin_" + plakatId
         );
 
-
     if (!pin) {
 
         alert(
@@ -1717,17 +1716,7 @@ function startRedirect(data) {
     }
 
 
-    console.log("STEP 1: Mengirim data ke server...");
-
-    console.log({
-        action: "edit",
-        id: plakatId,
-        pin: pin,
-        new_pin: newPin,
-        maps_url: mapsUrl,
-        nama_usaha: namaUsaha,
-        alamat: alamat
-    });
+    console.log("Mengirim data edit...");
 
 
     try {
@@ -1764,11 +1753,7 @@ function startRedirect(data) {
 
 
         console.log(
-            "STEP 2: Server response diterima"
-        );
-
-        console.log(
-            "HTTP status:",
+            "Response diterima:",
             response.status
         );
 
@@ -1778,10 +1763,9 @@ function startRedirect(data) {
 
 
         console.log(
-            "STEP 3: Response server:"
+            "Response server:",
+            responseText
         );
-
-        console.log(responseText);
 
 
         let result;
@@ -1791,15 +1775,16 @@ function startRedirect(data) {
             result =
                 JSON.parse(responseText);
 
-        } catch (jsonError) {
+        } catch (error) {
 
             console.error(
-                "STEP 3 ERROR: Response bukan JSON",
-                jsonError
+                "Response bukan JSON:",
+                error
             );
 
             alert(
-                "Data sudah tersimpan, tetapi response server tidak dapat dibaca."
+                "Server berhasil menerima data, " +
+                "tetapi response tidak dapat dibaca."
             );
 
             return;
@@ -1807,29 +1792,21 @@ function startRedirect(data) {
 
 
         console.log(
-            "STEP 4: JSON berhasil dibaca"
+            "Hasil edit:",
+            result
         );
-
-        console.log(result);
 
 
         // =====================================
-        // RESPONSE UPDATED
+        // BERHASIL
         // =====================================
 
         if (result.status === "updated") {
 
-            console.log(
-                "STEP 5: Update berhasil"
-            );
+            // Jika PIN diganti,
+            // simpan PIN baru ke session.
 
-
-            // Jika PIN diganti
             if (newPin !== "") {
-
-                console.log(
-                    "STEP 6: Menyimpan PIN baru ke session"
-                );
 
                 sessionStorage.setItem(
                     "nfc_edit_pin_" + plakatId,
@@ -1842,17 +1819,6 @@ function startRedirect(data) {
             window.pendingEdit = null;
 
 
-            console.log(
-                "STEP 7: Menampilkan halaman sukses"
-            );
-
-
-            /*
-             * Penting:
-             * showEditSuccess dipisahkan dari
-             * try/catch server.
-             */
-
             showEditSuccess(result);
 
 
@@ -1861,7 +1827,7 @@ function startRedirect(data) {
 
 
         // =====================================
-        // WRONG PIN
+        // PIN SALAH
         // =====================================
 
         if (result.status === "wrong_pin") {
@@ -1887,7 +1853,7 @@ function startRedirect(data) {
     } catch (error) {
 
         console.error(
-            "SERVER/FETCH ERROR:",
+            "ERROR:",
             error
         );
 
