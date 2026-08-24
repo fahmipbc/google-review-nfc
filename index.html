@@ -1694,7 +1694,7 @@ function startRedirect(data) {
 
 }
 
-    async function saveEditToServer(
+   async function saveEditToServer(
     namaUsaha,
     alamat,
     mapsUrl,
@@ -1709,11 +1709,12 @@ function startRedirect(data) {
 
     if (!pin) {
 
-        showEditError(
-            "Sesi PIN sudah berakhir."
+        alert(
+            "Sesi PIN sudah berakhir. Silakan masukkan PIN kembali."
         );
 
         return;
+
     }
 
 
@@ -1750,14 +1751,74 @@ function startRedirect(data) {
             });
 
 
-        const result =
-            await response.json();
+        // =====================================
+        // AMBIL RESPONSE SEBAGAI TEXT DAHULU
+        // =====================================
 
+        const responseText =
+            await response.text();
+
+
+        console.log(
+            "SERVER RESPONSE:",
+            responseText
+        );
+
+
+        // =====================================
+        // COBA PARSE JSON
+        // =====================================
+
+        let result;
+
+        try {
+
+            result =
+                JSON.parse(responseText);
+
+        } catch (jsonError) {
+
+            console.error(
+                "Response bukan JSON:",
+                responseText
+            );
+
+            /*
+             * Data mungkin sebenarnya sudah
+             * berhasil disimpan di server.
+             *
+             * Jangan langsung mengatakan
+             * 'gagal menghubungi server'.
+             */
+
+            alert(
+                "Data kemungkinan sudah tersimpan, " +
+                "tetapi server mengirim respons " +
+                "yang tidak dapat dibaca."
+            );
+
+            return;
+
+        }
+
+
+        console.log(
+            "EDIT RESULT:",
+            result
+        );
+
+
+        // =====================================
+        // BERHASIL
+        // =====================================
 
         if (result.status === "updated") {
 
-            // Kalau PIN diganti,
-            // update PIN dalam session.
+            /*
+             * Jika PIN diganti,
+             * update PIN yang tersimpan
+             * dalam session.
+             */
 
             if (newPin !== "") {
 
@@ -1771,23 +1832,34 @@ function startRedirect(data) {
 
             window.pendingEdit = null;
 
+
             showEditSuccess(result);
 
             return;
+
         }
 
 
+        // =====================================
+        // PIN SALAH
+        // =====================================
+
         if (result.status === "wrong_pin") {
 
-            showEditError(
+            alert(
                 "PIN lama tidak valid."
             );
 
             return;
+
         }
 
 
-        showEditError(
+        // =====================================
+        // ERROR DARI SERVER
+        // =====================================
+
+        alert(
             result.message ||
             "Gagal menyimpan perubahan."
         );
@@ -1795,10 +1867,14 @@ function startRedirect(data) {
 
     } catch (error) {
 
-        console.error(error);
+        console.error(
+            "FETCH ERROR:",
+            error
+        );
 
-        showEditError(
-            "Gagal menghubungi server."
+        alert(
+            "Gagal menghubungi server.\n\n" +
+            error.message
         );
 
     }
