@@ -11,6 +11,9 @@
     <button onclick="registerPlakat()">REGISTER</button>
 
     <pre id="result"></pre>
+    <button onclick="editPlakat()">
+        TEST EDIT
+    </button>
 
 <script>
 
@@ -18,43 +21,50 @@ const API_URL =
     "https://script.google.com/macros/s/AKfycbySSJ0dGfVTD7A8Olvkkmi_RMbu3UVeYd6Gxlo6hPfDHPFyyVl5huz1HwIHO9Rly2XI/exec";
 
 
-async function registerPlakat() {
+async function editPlakat() {
 
     const data = {
-    action: "register",
 
-    id: 1,
+        action: "edit",
 
-    maps_url:
-        "https://maps.app.goo.gl/COBA-LAGI",
+        id: 1,
 
-    pin:
-        "999999",
+        maps_url:
+            "https://maps.app.goo.gl/test-edit",
 
-    nama_usaha:
-        "USAHA LAIN",
+        pin:
+            "123456",
 
-    alamat:
-        "Alamat Lain"
-};
+        nama_usaha:
+            "Toko ABC EDIT",
+
+        alamat:
+            "Jl. Sudirman No. 99"
+
+    };
 
 
     try {
 
-        const response = await fetch(API_URL, {
+        const response =
+            await fetch(API_URL, {
 
-            method: "POST",
+                method: "POST",
 
-            headers: {
-                "Content-Type": "text/plain;charset=utf-8"
-            },
+                headers: {
+                    "Content-Type":
+                        "text/plain;charset=utf-8"
+                },
 
-            body: JSON.stringify(data)
+                body:
+                    JSON.stringify(data)
 
-        });
+            });
 
 
-        const result = await response.json();
+        const result =
+            await response.json();
+
 
         document.getElementById("result").textContent =
             JSON.stringify(result, null, 2);
