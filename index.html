@@ -3,14 +3,254 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Google Review NFC</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #ffffff;
+            font-family: Arial, sans-serif;
+            color: #333;
+        }
+
+        .container {
+            text-align: center;
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .message {
+            font-size: 15px;
+            color: #777;
+        }
+
+        .loader {
+            width: 28px;
+            height: 28px;
+            margin: 20px auto;
+            border: 3px solid #ddd;
+            border-top: 3px solid #4285f4;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Tombol setting dibuat samar */
+        .settings-button {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+
+            width: 28px;
+            height: 28px;
+
+            border: none;
+            background: transparent;
+            color: #ccc;
+
+            font-size: 16px;
+            cursor: pointer;
+
+            opacity: 0.35;
+        }
+
+        .settings-button:hover {
+            opacity: 1;
+            color: #555;
+        }
+
+        /* Panel setting */
+        .settings {
+            display: none;
+
+            position: fixed;
+            top: 50px;
+            right: 10px;
+
+            width: 300px;
+            padding: 18px;
+
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 10px;
+
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+        }
+
+        .settings h3 {
+            margin-top: 0;
+        }
+
+        .settings input {
+            width: 100%;
+            padding: 9px;
+            margin: 8px 0;
+        }
+
+        .settings button {
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
 
-    <h1>Google Review NFC</h1>
+    <div class="container">
 
-    <p>Website berhasil terhubung.</p>
+        <div class="title">
+            Google Review NFC
+        </div>
+
+        <div class="loader"></div>
+
+        <div class="message">
+            Mengarahkan ke Google Review...
+        </div>
+
+    </div>
+
+
+    <!-- Tombol setting tersembunyi -->
+    <button class="settings-button"
+            onclick="openSettings()"
+            title="Settings">
+        ⚙
+    </button>
+
+
+    <!-- Panel setting -->
+    <div class="settings" id="settingsPanel">
+
+        <h3>Settings</h3>
+
+        <label>
+            Google Review URL
+        </label>
+
+        <input
+            type="text"
+            id="reviewUrl"
+            placeholder="https://g.page/r/..."
+        >
+
+        <button onclick="saveUrl()">
+            Simpan
+        </button>
+
+        <button onclick="closeSettings()">
+            Tutup
+        </button>
+
+    </div>
+
+
+    <script>
+
+        /*
+         * ==========================================
+         * GOOGLE REVIEW URL
+         * ==========================================
+         */
+
+        const DEFAULT_REVIEW_URL =
+            "https://g.page/r/XXXXXXXXXXXX/review";
+
+
+        /*
+         * Waktu sebelum redirect
+         * 2000 = 2 detik
+         */
+
+        const REDIRECT_DELAY = 2000;
+
+
+        /*
+         * Buka setting
+         */
+
+        function openSettings() {
+
+            document.getElementById("settingsPanel").style.display = "block";
+
+            document.getElementById("reviewUrl").value =
+                localStorage.getItem("reviewUrl") ||
+                DEFAULT_REVIEW_URL;
+        }
+
+
+        /*
+         * Tutup setting
+         */
+
+        function closeSettings() {
+
+            document.getElementById("settingsPanel").style.display = "none";
+        }
+
+
+        /*
+         * Simpan URL
+         */
+
+        function saveUrl() {
+
+            const url =
+                document.getElementById("reviewUrl").value.trim();
+
+            if (!url) {
+                alert("URL Google Review belum diisi.");
+                return;
+            }
+
+            localStorage.setItem("reviewUrl", url);
+
+            alert("URL berhasil disimpan.");
+
+            closeSettings();
+        }
+
+
+        /*
+         * Ambil URL
+         */
+
+        function getReviewUrl() {
+
+            return localStorage.getItem("reviewUrl") ||
+                   DEFAULT_REVIEW_URL;
+        }
+
+
+        /*
+         * Redirect
+         */
+
+        setTimeout(function() {
+
+            window.location.replace(getReviewUrl());
+
+        }, REDIRECT_DELAY);
+
+    </script>
 
 </body>
 </html>
