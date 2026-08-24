@@ -1835,46 +1835,98 @@ function startRedirect(data) {
 
         <div class="message">
 
-            <div class="setting-title">
-
+            <div class="success-title">
                 Berhasil disimpan
-
             </div>
 
 
             <div class="business-name">
-
-                ${escapeHtml(
-                    data.nama_usaha
-                )}
-
+                ${escapeHtml(result.nama_usaha)}
             </div>
 
 
             <div class="address">
-
-                ${escapeHtml(
-                    data.alamat
-                )}
-
+                ${escapeHtml(result.alamat)}
             </div>
 
 
-            <div style="
-                margin-top:20px;
-                color:#666;
-                line-height:1.5;
-            ">
+            <div class="success-message">
+                Informasi plakat telah berhasil
+                diperbarui.
+            </div>
 
-                Informasi plakat telah
-                berhasil diperbarui.
 
+            <div class="spinner"></div>
+
+
+            <div class="redirect-message">
+                Membuka Google Maps...
+            </div>
+
+
+            <div class="countdown">
+                Mengarahkan dalam
+                <strong id="successSeconds">2</strong>
+                detik
             </div>
 
         </div>
 
     `;
 
+
+    let seconds = 2;
+
+
+    const countdown =
+        setInterval(function () {
+
+            seconds--;
+
+
+            const element =
+                document.getElementById(
+                    "successSeconds"
+                );
+
+
+            if (!element) {
+
+                clearInterval(countdown);
+
+                return;
+            }
+
+
+            if (seconds > 0) {
+
+                element.textContent = seconds;
+
+            } else {
+
+                clearInterval(countdown);
+
+                // Redirect ke Google Maps
+                if (result.maps_url) {
+
+                    window.location.href =
+                        result.maps_url;
+
+                } else {
+
+                    // Jika link kosong,
+                    // kembali ke halaman utama.
+
+                    window.location.href =
+                        "?id=" +
+                        encodeURIComponent(plakatId);
+
+                }
+
+            }
+
+        }, 1000);
+        
 }
 
 function confirmPinChange() {
