@@ -1586,32 +1586,20 @@ function startRedirect(data) {
     async function saveEdit() {
 
     const namaUsaha =
-        document
-            .getElementById("editNama")
-            .value
-            .trim();
+        document.getElementById("editNama").value.trim();
 
     const alamat =
-        document
-            .getElementById("editAlamat")
-            .value
-            .trim();
+        document.getElementById("editAlamat").value.trim();
 
     const mapsUrl =
-        document
-            .getElementById("editMaps")
-            .value
-            .trim();
+        document.getElementById("editMaps").value.trim();
 
     const newPin =
-        document
-            .getElementById("editNewPin")
-            .value
-            .trim();
+        document.getElementById("editNewPin").value.trim();
 
 
     // =========================================
-    // VALIDASI DATA
+    // VALIDASI
     // =========================================
 
     if (!namaUsaha) {
@@ -1650,6 +1638,7 @@ function startRedirect(data) {
 
     if (newPin !== "") {
 
+        // Hanya angka
         if (!/^\d+$/.test(newPin)) {
 
             showEditError(
@@ -1660,6 +1649,7 @@ function startRedirect(data) {
         }
 
 
+        // Minimal 4 angka
         if (newPin.length < 4) {
 
             showEditError(
@@ -1670,22 +1660,29 @@ function startRedirect(data) {
         }
 
 
-        // Jangan langsung simpan.
-        // Tampilkan konfirmasi + countdown.
+        // Simpan data sementara
+        window.pendingEdit = {
 
-        confirmPinChange(
-            namaUsaha,
-            alamat,
-            mapsUrl,
-            newPin
-        );
+            namaUsaha: namaUsaha,
+
+            alamat: alamat,
+
+            mapsUrl: mapsUrl,
+
+            newPin: newPin
+
+        };
+
+
+        // Tampilkan peringatan
+        confirmPinChange();
 
         return;
     }
 
 
     // =========================================
-    // JIKA PIN BARU DIKOSONGKAN
+    // PIN TIDAK DIGANTI
     // =========================================
 
     saveEditToServer(
@@ -1877,6 +1874,177 @@ function startRedirect(data) {
         </div>
 
     `;
+
+}
+
+function confirmPinChange() {
+
+    const data = window.pendingEdit;
+
+    if (!data) {
+        return;
+    }
+
+
+    content.innerHTML = `
+
+        <div class="message">
+
+            <div class="setting-title">
+                ⚠️ Ganti PIN?
+            </div>
+
+
+            <div style="
+                text-align:left;
+                line-height:1.6;
+                color:#555;
+                margin-bottom:20px;
+            ">
+
+                Anda memasukkan PIN baru.
+
+                <br><br>
+
+                Jika PIN diganti,
+                <strong>PIN lama tidak dapat
+                digunakan lagi</strong>
+                untuk mengedit plakat ini.
+
+                <br><br>
+
+                Pastikan Anda mengingat
+                PIN baru sebelum melanjutkan.
+
+            </div>
+
+
+            <div
+                id="pinCountdown"
+                style="
+                    margin-bottom:15px;
+                    font-size:14px;
+                    color:#777;
+                "
+            >
+
+                Tombol akan aktif dalam
+                <strong>3</strong> detik...
+
+            </div>
+
+
+            <button
+                class="button button-secondary"
+                onclick="cancelPinChange()"
+            >
+                BATAL
+            </button>
+
+
+            <button
+                class="button button-primary"
+                id="confirmPinButton"
+                disabled
+                onclick="executeEditWithNewPin()"
+            >
+                GANTI PIN
+            </button>
+
+        </div>
+
+    `;
+
+
+    let seconds = 3;
+
+
+    const countdown =
+        setInterval(function () {
+
+            seconds--;
+
+
+            const element =
+                document.getElementById(
+                    "pinCountdown"
+                );
+
+
+            if (!element) {
+
+                clearInterval(countdown);
+
+                return;
+            }
+
+
+            if (seconds > 0) {
+
+                element.innerHTML =
+                    `Tombol akan aktif dalam
+                    <strong>${seconds}</strong>
+                    detik...`;
+
+            } else {
+
+                clearInterval(countdown);
+
+
+                element.innerHTML =
+                    "Pastikan PIN baru sudah benar.";
+
+
+                const button =
+                    document.getElementById(
+                        "confirmPinButton"
+                    );
+
+
+                if (button) {
+
+                    button.disabled = false;
+
+                }
+
+            }
+
+        }, 1000);
+
+}
+
+    function cancelPinChange() {
+
+    window.pendingEdit = null;
+
+    showEditForm();
+
+}
+
+    function executeEditWithNewPin() {
+
+    const data =
+        window.pendingEdit;
+
+
+    if (!data) {
+
+        return;
+
+    }
+
+
+    saveEditToServer(
+
+        data.namaUsaha,
+
+        data.alamat,
+
+        data.mapsUrl,
+
+        data.newPin
+
+    );
 
 }
     
