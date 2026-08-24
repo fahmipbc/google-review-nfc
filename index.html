@@ -1302,74 +1302,9 @@ function startRedirect(data) {
         "MEMERIKSA...";
 
 
-    /*
-     * Untuk keamanan dan kesederhanaan,
-     * kita gunakan data GET terlebih dahulu
-     * untuk mengambil data plakat.
-     */
-
     try {
 
         const response =
-            await fetch(
-
-                API_URL +
-                "?action=get&id=" +
-                encodeURIComponent(plakatId)
-
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (data.status !== "success") {
-
-            showPinError(
-                "Data plakat tidak ditemukan."
-            );
-
-            button.disabled = false;
-
-            button.textContent =
-                "LANJUT";
-
-            return;
-        }
-
-
-        /*
-         * PIN TIDAK DIKIRIM KEMBALI
-         * OLEH GET.
-         *
-         * Karena itu validasi PIN sebenarnya
-         * dilakukan melalui POST edit.
-         *
-         * Kita kirim data lama sebagai
-         * percobaan validasi.
-         */
-
-        const editData = {
-
-            action: "edit",
-
-            id: plakatId,
-
-            pin: pin,
-
-            maps_url: data.maps_url || "",
-
-            nama_usaha:
-                data.nama_usaha || "",
-
-            alamat:
-                data.alamat || ""
-
-        };
-
-
-        const editResponse =
             await fetch(API_URL, {
 
                 method: "POST",
@@ -1379,14 +1314,34 @@ function startRedirect(data) {
                         "text/plain;charset=utf-8"
                 },
 
-                body:
-                    JSON.stringify(editData)
+                body: JSON.stringify({
+
+                    action: "verify_pin",
+
+                    id: plakatId,
+
+                    pin: pin
+
+                })
 
             });
 
 
         const result =
-            await editResponse.json();
+            await response.json();
+
+
+        if (result.status === "pin_valid") {
+
+            sessionStorage.setItem(
+                "nfc_edit_pin_" + plakatId,
+                pin
+            );
+        
+            showEditForm();
+        
+            return;
+        }
 
 
         if (result.status === "wrong_pin") {
@@ -1395,27 +1350,14 @@ function startRedirect(data) {
                 "PIN salah."
             );
 
-            button.disabled = false;
+        } else {
 
-            button.textContent =
-                "LANJUT";
+            showPinError(
+                result.message ||
+                "PIN tidak dapat diverifikasi."
+            );
 
-            return;
         }
-
-
-        if (result.status === "updated") {
-
-            showEditForm(result);
-
-            return;
-        }
-
-
-        showPinError(
-            result.message ||
-            "PIN tidak dapat diverifikasi."
-        );
 
 
         button.disabled = false;
@@ -1439,6 +1381,422 @@ function startRedirect(data) {
             "LANJUT";
 
     }
+
+}
+
+    function showPinError(message) {
+
+    const element =
+        document.getElementById("pinError");
+
+
+    if (!element) {
+
+        alert(message);
+
+        return;
+
+    }
+
+
+    element.textContent =
+        message;
+
+
+    element.style.display =
+        "block";
+
+}
+
+    async function showEditForm() {
+
+    try {
+
+        const response =
+            await fetch(
+
+                API_URL +
+                "?action=get&id=" +
+                encodeURIComponent(plakatId)
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (data.status !== "success") {
+
+            content.innerHTML = `
+
+                <div class="message">
+
+                    <div class="error">
+
+                        Data plakat tidak ditemukan.
+
+                    </div>
+
+                </div>
+
+            `;
+
+            return;
+        }
+
+
+        content.innerHTML = `
+
+            <div class="message">
+
+                <div class="setting-title">
+
+                    Edit Plakat
+
+                </div>
+
+
+                <div
+                    class="form-error"
+                    id="editError"
+                ></div>
+
+
+                <div class="form-group">
+
+                    <label>
+
+                        Nama usaha
+
+                    </label>
+
+                    <input
+                        type="text"
+                        id="editNama"
+                        value="${escapeHtml(
+                            data.nama_usaha
+                        )}"
+                    >
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+
+                        Alamat
+
+                    </label>
+
+                    <textarea
+                        id="editAlamat"
+                    >${escapeHtml(
+                        data.alamat
+                    )}</textarea>
+
+                </div>
+
+
+                <div class="form-group">
+
+                    <label>
+
+                        Link Google Maps
+
+                    </label>
+
+                    <input
+                        type="url"
+                        id="editMaps"
+                        value="${escapeHtml(
+                            data.maps_url
+                        )}"
+                    >
+
+                </div>
+
+
+                <button
+                    class="button button-primary"
+                    id="editSaveButton"
+                    onclick="saveEdit()"
+                >
+
+                    SIMPAN PERUBAHAN
+
+                </button>
+
+            </div>
+
+        `;
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        content.innerHTML = `
+
+            <div class="message">
+
+                <div class="error">
+
+                    Gagal mengambil data plakat.
+
+                </div>
+
+            </div>
+
+        `;
+
+    }
+
+}
+
+    async function saveEdit() {
+
+    const namaUsaha =
+        document
+            .getElementById("editNama")
+            .value
+            .trim();
+
+
+    const alamat =
+        document
+            .getElementById("editAlamat")
+            .value
+            .trim();
+
+
+    const mapsUrl =
+        document
+            .getElementById("editMaps")
+            .value
+            .trim();
+
+
+    if (!namaUsaha) {
+
+        showEditError(
+            "Nama usaha belum diisi."
+        );
+
+        return;
+
+    }
+
+
+    if (!alamat) {
+
+        showEditError(
+            "Alamat belum diisi."
+        );
+
+        return;
+
+    }
+
+
+    if (!mapsUrl) {
+
+        showEditError(
+            "Link Google Maps belum diisi."
+        );
+
+        return;
+
+    }
+
+
+    /*
+     * PIN tidak kita minta lagi.
+     *
+     * Untuk tahap ini kita simpan PIN
+     * dalam session browser setelah
+     * berhasil diverifikasi.
+     */
+
+    const pin =
+        sessionStorage.getItem(
+            "nfc_edit_pin_" + plakatId
+        );
+
+
+    if (!pin) {
+
+        showEditError(
+            "Sesi PIN sudah berakhir. Silakan masukkan PIN lagi."
+        );
+
+        return;
+
+    }
+
+
+    const button =
+        document.getElementById(
+            "editSaveButton"
+        );
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "MENYIMPAN...";
+
+
+    try {
+
+        const response =
+            await fetch(API_URL, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "text/plain;charset=utf-8"
+                },
+
+                body: JSON.stringify({
+
+                    action: "edit",
+
+                    id: plakatId,
+
+                    pin: pin,
+
+                    maps_url: mapsUrl,
+
+                    nama_usaha: namaUsaha,
+
+                    alamat: alamat
+
+                })
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        if (result.status === "updated") {
+
+            showEditSuccess(
+                result
+            );
+
+            return;
+
+        }
+
+
+        showEditError(
+            result.status === "wrong_pin"
+                ? "PIN salah."
+                : (
+                    result.message ||
+                    "Gagal menyimpan."
+                )
+        );
+
+
+        button.disabled = false;
+
+        button.textContent =
+            "SIMPAN PERUBAHAN";
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showEditError(
+            "Gagal menghubungi server."
+        );
+
+
+        button.disabled = false;
+
+        button.textContent =
+            "SIMPAN PERUBAHAN";
+
+    }
+
+}
+
+    function showEditError(message) {
+
+    const element =
+        document.getElementById("editError");
+
+
+    if (!element) {
+
+        alert(message);
+
+        return;
+
+    }
+
+
+    element.textContent =
+        message;
+
+
+    element.style.display =
+        "block";
+
+}
+
+    function showEditSuccess(data) {
+
+    content.innerHTML = `
+
+        <div class="message">
+
+            <div class="setting-title">
+
+                Berhasil disimpan
+
+            </div>
+
+
+            <div class="business-name">
+
+                ${escapeHtml(
+                    data.nama_usaha
+                )}
+
+            </div>
+
+
+            <div class="address">
+
+                ${escapeHtml(
+                    data.alamat
+                )}
+
+            </div>
+
+
+            <div style="
+                margin-top:20px;
+                color:#666;
+                line-height:1.5;
+            ">
+
+                Informasi plakat telah
+                berhasil diperbarui.
+
+            </div>
+
+        </div>
+
+    `;
 
 }
     
