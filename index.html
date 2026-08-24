@@ -270,6 +270,166 @@
             text-align: center;
         }
 
+        /* =========================================
+           SETTING BUTTON
+           ========================================= */
+        
+        .setting-button {
+            position: absolute;
+        
+            right: 10px;
+            bottom: 8px;
+        
+            width: 28px;
+            height: 28px;
+        
+            border: none;
+            background: transparent;
+        
+            color: #bbb;
+        
+            font-size: 15px;
+        
+            opacity: 0.35;
+        
+            cursor: pointer;
+        
+            padding: 0;
+        }
+        
+        .setting-button:hover {
+            opacity: 0.8;
+        }
+        
+        
+        /* =========================================
+           SETTING / EDIT
+           ========================================= */
+        
+        .setting-area {
+            position: relative;
+            padding-top: 5px;
+        }
+        
+        
+        .setting-title {
+            font-size: 21px;
+            font-weight: 600;
+        
+            margin-bottom: 22px;
+        }
+        
+        
+        .form-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+        
+        
+        .form-group label {
+            display: block;
+        
+            font-size: 14px;
+            font-weight: 600;
+        
+            margin-bottom: 7px;
+        }
+        
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+        
+            padding: 12px 13px;
+        
+            border: 1px solid #ddd;
+            border-radius: 9px;
+        
+            font-size: 15px;
+            font-family: inherit;
+        
+            outline: none;
+        
+            background: #fff;
+        }
+        
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #777;
+        }
+        
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        
+        .button {
+            width: 100%;
+        
+            border: none;
+            border-radius: 9px;
+        
+            padding: 13px;
+        
+            font-size: 15px;
+            font-weight: 600;
+        
+            cursor: pointer;
+        
+            margin-top: 5px;
+        }
+        
+        
+        .button-primary {
+            background: #222;
+            color: white;
+        }
+        
+        
+        .button-secondary {
+            background: #eee;
+            color: #333;
+        }
+        
+        
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        
+        .form-error {
+            display: none;
+        
+            background: #fff0f0;
+        
+            color: #c62828;
+        
+            border-radius: 8px;
+        
+            padding: 10px;
+        
+            margin-bottom: 15px;
+        
+            font-size: 13px;
+        
+            text-align: left;
+        }
+        
+        
+        .pin-description {
+            font-size: 12px;
+        
+            color: #777;
+        
+            line-height: 1.5;
+        
+            margin-top: 6px;
+        }
+
     </style>
 
 </head>
@@ -426,6 +586,7 @@ async function getPlakat() {
             return;
         }
 
+        let redirectTimer = null;
 
         // =============================================
         // SUDAH TERDAFTAR
@@ -914,8 +1075,7 @@ function showRegistrationSuccess(data) {
 
 function startRedirect(data) {
 
-    const mapsUrl =
-        data.maps_url;
+    const mapsUrl = data.maps_url;
 
 
     if (!mapsUrl) {
@@ -926,7 +1086,8 @@ function startRedirect(data) {
 
                 <div class="error">
 
-                    Link Google Maps belum dikonfigurasi.
+                    Link Google Maps belum
+                    dikonfigurasi.
 
                 </div>
 
@@ -935,13 +1096,15 @@ function startRedirect(data) {
         `;
 
         return;
-
     }
 
 
     content.innerHTML = `
 
-        <div class="message">
+        <div
+            class="message"
+            style="position:relative;"
+        >
 
             <div class="business-name">
 
@@ -949,19 +1112,23 @@ function startRedirect(data) {
 
             </div>
 
+
             <div class="address">
 
                 ${escapeHtml(data.alamat)}
 
             </div>
 
+
             <div class="spinner"></div>
+
 
             <div>
 
                 Membuka Google Maps...
 
             </div>
+
 
             <div class="countdown">
 
@@ -971,6 +1138,18 @@ function startRedirect(data) {
 
             </div>
 
+
+            <!-- SETTING TERSEMBUNYI -->
+
+            <button
+                class="setting-button"
+                id="settingButton"
+                title="Pengaturan"
+                onclick="openPinScreen()"
+            >
+                ⚙
+            </button>
+
         </div>
 
     `;
@@ -979,9 +1158,10 @@ function startRedirect(data) {
     let seconds = 3;
 
 
-    const timer = setInterval(() => {
+   redirectTimer = setInterval(() => {
 
         seconds--;
+
 
         const secondsElement =
             document.getElementById("seconds");
@@ -997,17 +1177,271 @@ function startRedirect(data) {
 
         if (seconds <= 0) {
 
-            clearInterval(timer);
+            clearInterval(redirectTimer);
 
             window.location.href = mapsUrl;
 
         }
 
     }, 1000);
+}
+
+    function openPinScreen() {
+
+    // Hentikan redirect
+    if (redirectTimer) {
+
+        clearInterval(redirectTimer);
+
+        redirectTimer = null;
+
+    }
+
+
+    content.innerHTML = `
+
+        <div class="message">
+
+            <div class="setting-title">
+
+                Pengaturan Plakat
+
+            </div>
+
+
+            <div
+                class="form-error"
+                id="pinError"
+            ></div>
+
+
+            <div class="form-group">
+
+                <label for="editPin">
+
+                    PIN
+
+                </label>
+
+
+                <input
+                    type="password"
+                    id="editPin"
+                    placeholder="Masukkan PIN"
+                    inputmode="numeric"
+                    autocomplete="off"
+                >
+
+
+                <div class="pin-description">
+
+                    Masukkan PIN yang digunakan
+                    saat konfigurasi plakat.
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="button button-primary"
+                id="pinButton"
+                onclick="verifyPin()"
+            >
+
+                LANJUT
+
+            </button>
+
+        </div>
+
+    `;
+
+
+    // Fokus otomatis ke PIN
+
+    setTimeout(() => {
+
+        const input =
+            document.getElementById("editPin");
+
+        if (input) {
+            input.focus();
+        }
+
+    }, 100);
 
 }
 
+    async function verifyPin() {
 
+    const pin =
+        document
+            .getElementById("editPin")
+            .value
+            .trim();
+
+
+    if (!pin) {
+
+        showPinError(
+            "PIN belum diisi."
+        );
+
+        return;
+    }
+
+
+    const button =
+        document.getElementById("pinButton");
+
+
+    button.disabled = true;
+
+    button.textContent =
+        "MEMERIKSA...";
+
+
+    /*
+     * Untuk keamanan dan kesederhanaan,
+     * kita gunakan data GET terlebih dahulu
+     * untuk mengambil data plakat.
+     */
+
+    try {
+
+        const response =
+            await fetch(
+
+                API_URL +
+                "?action=get&id=" +
+                encodeURIComponent(plakatId)
+
+            );
+
+
+        const data =
+            await response.json();
+
+
+        if (data.status !== "success") {
+
+            showPinError(
+                "Data plakat tidak ditemukan."
+            );
+
+            button.disabled = false;
+
+            button.textContent =
+                "LANJUT";
+
+            return;
+        }
+
+
+        /*
+         * PIN TIDAK DIKIRIM KEMBALI
+         * OLEH GET.
+         *
+         * Karena itu validasi PIN sebenarnya
+         * dilakukan melalui POST edit.
+         *
+         * Kita kirim data lama sebagai
+         * percobaan validasi.
+         */
+
+        const editData = {
+
+            action: "edit",
+
+            id: plakatId,
+
+            pin: pin,
+
+            maps_url: data.maps_url || "",
+
+            nama_usaha:
+                data.nama_usaha || "",
+
+            alamat:
+                data.alamat || ""
+
+        };
+
+
+        const editResponse =
+            await fetch(API_URL, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "text/plain;charset=utf-8"
+                },
+
+                body:
+                    JSON.stringify(editData)
+
+            });
+
+
+        const result =
+            await editResponse.json();
+
+
+        if (result.status === "wrong_pin") {
+
+            showPinError(
+                "PIN salah."
+            );
+
+            button.disabled = false;
+
+            button.textContent =
+                "LANJUT";
+
+            return;
+        }
+
+
+        if (result.status === "updated") {
+
+            showEditForm(result);
+
+            return;
+        }
+
+
+        showPinError(
+            result.message ||
+            "PIN tidak dapat diverifikasi."
+        );
+
+
+        button.disabled = false;
+
+        button.textContent =
+            "LANJUT";
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showPinError(
+            "Gagal menghubungi server."
+        );
+
+
+        button.disabled = false;
+
+        button.textContent =
+            "LANJUT";
+
+    }
+
+}
+    
 // =====================================================
 // ESCAPE HTML
 // =====================================================
