@@ -158,6 +158,118 @@
             color: #999;
         }
 
+        .form-group {
+            text-align: left;
+            margin-bottom: 18px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 13px;
+        
+            border: 1px solid #ddd;
+            border-radius: 9px;
+        
+            font-size: 15px;
+            font-family: inherit;
+        
+            outline: none;
+        
+            background: #fff;
+        }
+        
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: #777;
+        }
+        
+        .form-group textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.5;
+            margin-top: 6px;
+        }
+        
+        .button {
+            width: 100%;
+        
+            border: none;
+            border-radius: 9px;
+        
+            padding: 13px;
+        
+            font-size: 15px;
+            font-weight: 600;
+        
+            cursor: pointer;
+        
+            margin-top: 5px;
+        }
+        
+        .button-primary {
+            background: #222;
+            color: white;
+        }
+        
+        .button-secondary {
+            background: #eee;
+            color: #333;
+        
+            margin-bottom: 18px;
+        }
+        
+        .button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .setup-title {
+            font-size: 21px;
+            font-weight: 600;
+            margin-bottom: 22px;
+        }
+        
+        .setup-id {
+            font-size: 12px;
+            color: #999;
+            margin-top: 18px;
+        }
+        
+        .form-error {
+            display: none;
+        
+            background: #fff0f0;
+        
+            color: #c62828;
+        
+            border-radius: 8px;
+        
+            padding: 10px;
+        
+            margin-bottom: 15px;
+        
+            font-size: 13px;
+        
+            text-align: left;
+        }
+        
+        .form-success {
+            text-align: center;
+        }
+
     </style>
 
 </head>
@@ -309,29 +421,9 @@ async function getPlakat() {
 
         if (!data.pin_exist) {
 
-            content.innerHTML = `
-
-                <div class="message">
-
-                    <div class="setup">
-
-                        Plakat belum dikonfigurasi.
-
-                    </div>
-
-                    <div class="plakat-id">
-
-                        ID Plakat:
-                        ${escapeHtml(data.id_plakat)}
-
-                    </div>
-
-                </div>
-
-            `;
-
+            showRegistrationForm(data);
+        
             return;
-
         }
 
 
@@ -370,7 +462,452 @@ async function getPlakat() {
 
 }
 
+function showRegistrationForm(data) {
 
+    content.innerHTML = `
+
+        <div class="message">
+
+            <div class="setup-title">
+                Konfigurasi Plakat
+            </div>
+
+
+            <div class="form-error" id="formError"></div>
+
+
+            <div class="form-group">
+
+                <label for="namaUsaha">
+                    Nama usaha
+                </label>
+
+                <input
+                    type="text"
+                    id="namaUsaha"
+                    placeholder="Contoh: Toko ABC"
+                    autocomplete="organization"
+                >
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="alamatUsaha">
+                    Alamat usaha
+                </label>
+
+                <textarea
+                    id="alamatUsaha"
+                    placeholder="Contoh: Jl. Sudirman No. 10, Palembang"
+                ></textarea>
+
+            </div>
+
+
+            <button
+                class="button button-secondary"
+                onclick="openGoogleMapsSearch()"
+            >
+                Cari di Google Maps
+            </button>
+
+
+            <div class="form-group">
+
+                <label for="mapsUrl">
+                    Link Google Maps
+                </label>
+
+                <input
+                    type="url"
+                    id="mapsUrl"
+                    placeholder="Tempel link Google Maps di sini"
+                    autocomplete="off"
+                >
+
+                <div class="help-text">
+
+                    Cari usaha di Google Maps, pilih titik
+                    yang benar, lalu salin link Google Maps
+                    dan tempel di sini.
+
+                </div>
+
+            </div>
+
+
+            <div class="form-group">
+
+                <label for="userPin">
+                    PIN
+                </label>
+
+                <input
+                    type="password"
+                    id="userPin"
+                    placeholder="Buat PIN"
+                    inputmode="numeric"
+                    autocomplete="new-password"
+                >
+
+                <div class="help-text">
+
+                    PIN diperlukan jika Anda ingin
+                    mengubah konfigurasi plakat nanti.
+
+                </div>
+
+            </div>
+
+
+            <button
+                class="button button-primary"
+                id="saveButton"
+                onclick="registerPlakat()"
+            >
+                SIMPAN
+            </button>
+
+
+            <div class="setup-id">
+
+                ID Plakat:
+                ${escapeHtml(data.id_plakat)}
+
+            </div>
+
+        </div>
+
+    `;
+}
+
+function openGoogleMapsSearch() {
+
+    const nama =
+        document.getElementById("namaUsaha").value.trim();
+
+    const alamat =
+        document.getElementById("alamatUsaha").value.trim();
+
+
+    if (!nama && !alamat) {
+
+        showFormError(
+            "Isi nama usaha atau alamat terlebih dahulu."
+        );
+
+        return;
+    }
+
+
+    const query =
+        [nama, alamat]
+            .filter(Boolean)
+            .join(", ");
+
+
+    const mapsSearchUrl =
+        "https://www.google.com/maps/search/?api=1&query=" +
+        encodeURIComponent(query);
+
+
+    window.open(
+        mapsSearchUrl,
+        "_blank"
+    );
+}
+
+async function registerPlakat() {
+
+    const namaUsaha =
+        document.getElementById("namaUsaha")
+            .value
+            .trim();
+
+
+    const alamat =
+        document.getElementById("alamatUsaha")
+            .value
+            .trim();
+
+
+    const mapsUrl =
+        document.getElementById("mapsUrl")
+            .value
+            .trim();
+
+
+    const pin =
+        document.getElementById("userPin")
+            .value
+            .trim();
+
+
+    // =============================================
+    // VALIDASI
+    // =============================================
+
+    if (!namaUsaha) {
+
+        showFormError(
+            "Nama usaha belum diisi."
+        );
+
+        return;
+    }
+
+
+    if (!alamat) {
+
+        showFormError(
+            "Alamat usaha belum diisi."
+        );
+
+        return;
+    }
+
+
+    if (!mapsUrl) {
+
+        showFormError(
+            "Link Google Maps belum diisi."
+        );
+
+        return;
+    }
+
+
+    if (!pin) {
+
+        showFormError(
+            "PIN belum diisi."
+        );
+
+        return;
+    }
+
+
+    if (pin.length < 4) {
+
+        showFormError(
+            "PIN minimal 4 angka."
+        );
+
+        return;
+    }
+
+
+    // =============================================
+    // TOMBOL
+    // =============================================
+
+    const saveButton =
+        document.getElementById("saveButton");
+
+
+    saveButton.disabled = true;
+
+    saveButton.textContent =
+        "MENYIMPAN...";
+
+
+    // =============================================
+    // DATA
+    // =============================================
+
+    const data = {
+
+        action: "register",
+
+        id: plakatId,
+
+        maps_url: mapsUrl,
+
+        pin: pin,
+
+        nama_usaha: namaUsaha,
+
+        alamat: alamat
+
+    };
+
+
+    try {
+
+        const response =
+            await fetch(API_URL, {
+
+                method: "POST",
+
+                headers: {
+                    "Content-Type":
+                        "text/plain;charset=utf-8"
+                },
+
+                body:
+                    JSON.stringify(data)
+
+            });
+
+
+        const result =
+            await response.json();
+
+
+        // =========================================
+        // BERHASIL
+        // =========================================
+
+        if (result.status === "registered") {
+
+            showRegistrationSuccess(
+                result
+            );
+
+            return;
+        }
+
+
+        // =========================================
+        // SUDAH TERDAFTAR
+        // =========================================
+
+        if (result.status === "already_registered") {
+
+            showFormError(
+                "Plakat ini sudah dikonfigurasi."
+            );
+
+            saveButton.disabled = false;
+
+            saveButton.textContent =
+                "SIMPAN";
+
+            return;
+        }
+
+
+        // =========================================
+        // ERROR
+        // =========================================
+
+        showFormError(
+            result.message ||
+            "Gagal menyimpan konfigurasi."
+        );
+
+
+        saveButton.disabled = false;
+
+        saveButton.textContent =
+            "SIMPAN";
+
+
+    } catch (error) {
+
+        console.error(error);
+
+        showFormError(
+            "Gagal menghubungi server."
+        );
+
+
+        saveButton.disabled = false;
+
+        saveButton.textContent =
+            "SIMPAN";
+
+    }
+
+}
+
+function showFormError(message) {
+
+    const errorElement =
+        document.getElementById("formError");
+
+
+    if (!errorElement) {
+
+        alert(message);
+
+        return;
+    }
+
+
+    errorElement.textContent =
+        message;
+
+
+    errorElement.style.display =
+        "block";
+
+}
+
+function showRegistrationSuccess(data) {
+
+    content.innerHTML = `
+
+        <div class="message">
+
+            <div class="form-success">
+
+                <div class="setup-title">
+
+                    Konfigurasi berhasil
+
+                </div>
+
+
+                <div class="business-name">
+
+                    ${escapeHtml(
+                        data.nama_usaha
+                    )}
+
+                </div>
+
+
+                <div class="address">
+
+                    ${escapeHtml(
+                        data.alamat
+                    )}
+
+                </div>
+
+
+                <div style="
+                    margin-top:20px;
+                    color:#555;
+                    line-height:1.5;
+                ">
+
+                    Plakat ini sekarang sudah
+                    siap digunakan.
+
+                </div>
+
+
+                <div class="setup-id">
+
+                    ID Plakat:
+                    ${escapeHtml(
+                        data.id_plakat
+                    )}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    `;
+
+}
+    
 // =====================================================
 // REDIRECT
 // =====================================================
