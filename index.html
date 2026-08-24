@@ -1890,7 +1890,13 @@ function startRedirect(data) {
 
 }
 
-    function showEditSuccess(data) {
+    function showEditSuccess(result) {
+
+    console.log("showEditSuccess menerima:", result);
+
+    const mapsUrl = result.maps_url || "";
+    const namaUsaha = result.nama_usaha || "";
+    const alamat = result.alamat || "";
 
     content.innerHTML = `
 
@@ -1900,30 +1906,21 @@ function startRedirect(data) {
                 Berhasil disimpan
             </div>
 
-
             <div class="business-name">
-                ${escapeHtml(result.nama_usaha)}
+                ${escapeHtml(namaUsaha)}
             </div>
-
 
             <div class="address">
-                ${escapeHtml(result.alamat)}
+                ${escapeHtml(alamat)}
             </div>
-
 
             <div class="success-message">
-                Informasi plakat telah berhasil
-                diperbarui.
+                Informasi plakat telah berhasil diperbarui.
             </div>
-
-
-            <div class="spinner"></div>
-
 
             <div class="redirect-message">
                 Membuka Google Maps...
             </div>
-
 
             <div class="countdown">
                 Mengarahkan dalam
@@ -1935,59 +1932,54 @@ function startRedirect(data) {
 
     `;
 
-
     let seconds = 2;
 
+    const countdown = setInterval(function () {
 
-    const countdown =
-        setInterval(function () {
+        seconds--;
 
-            seconds--;
+        const element =
+            document.getElementById("successSeconds");
 
+        if (!element) {
 
-            const element =
-                document.getElementById(
-                    "successSeconds"
-                );
+            clearInterval(countdown);
+            return;
 
+        }
 
-            if (!element) {
+        if (seconds > 0) {
 
-                clearInterval(countdown);
+            element.textContent = seconds;
+            return;
 
-                return;
-            }
+        }
 
+        clearInterval(countdown);
 
-            if (seconds > 0) {
+        if (mapsUrl) {
 
-                element.textContent = seconds;
+            console.log(
+                "Redirect ke Google Maps:",
+                mapsUrl
+            );
 
-            } else {
+            window.location.href = mapsUrl;
 
-                clearInterval(countdown);
+        } else {
 
-                // Redirect ke Google Maps
-                if (result.maps_url) {
+            console.warn(
+                "maps_url kosong"
+            );
 
-                    window.location.href =
-                        result.maps_url;
+            window.location.href =
+                "?id=" +
+                encodeURIComponent(plakatId);
 
-                } else {
+        }
 
-                    // Jika link kosong,
-                    // kembali ke halaman utama.
+    }, 1000);
 
-                    window.location.href =
-                        "?id=" +
-                        encodeURIComponent(plakatId);
-
-                }
-
-            }
-
-        }, 1000);
-        
 }
 
 function confirmPinChange() {
