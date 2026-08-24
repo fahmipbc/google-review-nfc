@@ -1714,8 +1714,20 @@ function startRedirect(data) {
         );
 
         return;
-
     }
+
+
+    console.log("STEP 1: Mengirim data ke server...");
+
+    console.log({
+        action: "edit",
+        id: plakatId,
+        pin: pin,
+        new_pin: newPin,
+        maps_url: mapsUrl,
+        nama_usaha: namaUsaha,
+        alamat: alamat
+    });
 
 
     try {
@@ -1751,23 +1763,26 @@ function startRedirect(data) {
             });
 
 
-        // =====================================
-        // AMBIL RESPONSE SEBAGAI TEXT DAHULU
-        // =====================================
+        console.log(
+            "STEP 2: Server response diterima"
+        );
+
+        console.log(
+            "HTTP status:",
+            response.status
+        );
+
 
         const responseText =
             await response.text();
 
 
         console.log(
-            "SERVER RESPONSE:",
-            responseText
+            "STEP 3: Response server:"
         );
 
+        console.log(responseText);
 
-        // =====================================
-        // COBA PARSE JSON
-        // =====================================
 
         let result;
 
@@ -1779,48 +1794,42 @@ function startRedirect(data) {
         } catch (jsonError) {
 
             console.error(
-                "Response bukan JSON:",
-                responseText
+                "STEP 3 ERROR: Response bukan JSON",
+                jsonError
             );
 
-            /*
-             * Data mungkin sebenarnya sudah
-             * berhasil disimpan di server.
-             *
-             * Jangan langsung mengatakan
-             * 'gagal menghubungi server'.
-             */
-
             alert(
-                "Data kemungkinan sudah tersimpan, " +
-                "tetapi server mengirim respons " +
-                "yang tidak dapat dibaca."
+                "Data sudah tersimpan, tetapi response server tidak dapat dibaca."
             );
 
             return;
-
         }
 
 
         console.log(
-            "EDIT RESULT:",
-            result
+            "STEP 4: JSON berhasil dibaca"
         );
+
+        console.log(result);
 
 
         // =====================================
-        // BERHASIL
+        // RESPONSE UPDATED
         // =====================================
 
         if (result.status === "updated") {
 
-            /*
-             * Jika PIN diganti,
-             * update PIN yang tersimpan
-             * dalam session.
-             */
+            console.log(
+                "STEP 5: Update berhasil"
+            );
 
+
+            // Jika PIN diganti
             if (newPin !== "") {
+
+                console.log(
+                    "STEP 6: Menyimpan PIN baru ke session"
+                );
 
                 sessionStorage.setItem(
                     "nfc_edit_pin_" + plakatId,
@@ -1833,15 +1842,26 @@ function startRedirect(data) {
             window.pendingEdit = null;
 
 
+            console.log(
+                "STEP 7: Menampilkan halaman sukses"
+            );
+
+
+            /*
+             * Penting:
+             * showEditSuccess dipisahkan dari
+             * try/catch server.
+             */
+
             showEditSuccess(result);
 
-            return;
 
+            return;
         }
 
 
         // =====================================
-        // PIN SALAH
+        // WRONG PIN
         // =====================================
 
         if (result.status === "wrong_pin") {
@@ -1851,7 +1871,6 @@ function startRedirect(data) {
             );
 
             return;
-
         }
 
 
@@ -1868,7 +1887,7 @@ function startRedirect(data) {
     } catch (error) {
 
         console.error(
-            "FETCH ERROR:",
+            "SERVER/FETCH ERROR:",
             error
         );
 
