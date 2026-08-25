@@ -3,22 +3,16 @@
 <head>
 
     <meta charset="UTF-8">
-
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0">
-
     <title>Google Review NFC</title>
-
     <style>
-
         * {
             box-sizing: border-box;
         }
-
         body {
             margin: 0;
             padding: 0;
-
             font-family:
                 -apple-system,
                 BlinkMacSystemFont,
@@ -26,1449 +20,491 @@
                 Roboto,
                 Arial,
                 sans-serif;
-
             background: #f5f5f5;
-
             color: #222;
-
             min-height: 100vh;
-
             display: flex;
-
             align-items: center;
-
             justify-content: center;
-        }
-
-
         .container {
-
             width: 100%;
-
             max-width: 420px;
-
             padding: 30px 20px;
-
             text-align: center;
-        }
-
-
         h1 {
-
             margin: 0 0 30px;
-
             font-size: 28px;
-
             font-weight: 600;
-        }
-
-
         .message {
-
             background: white;
-
             border-radius: 16px;
-
             padding: 30px 24px;
-
             box-shadow:
                 0 4px 20px rgba(0, 0, 0, 0.08);
-        }
-
-
         .business-name {
-
             font-size: 22px;
-
-            font-weight: 600;
-
             margin-bottom: 10px;
-        }
-
-
         .address {
-
             color: #666;
-
             line-height: 1.5;
-
             margin-bottom: 25px;
-        }
-
-
         .countdown {
-
             font-size: 14px;
-
             color: #777;
-
             margin-top: 20px;
-        }
-
-
         .spinner {
-
             width: 32px;
-
             height: 32px;
-
             border: 3px solid #ddd;
-
             border-top-color: #333;
-
             border-radius: 50%;
-
             animation: spin 0.8s linear infinite;
-
             margin: 20px auto;
-        }
-
-
         @keyframes spin {
-
             to {
                 transform: rotate(360deg);
             }
-
-        }
-
-
         .error {
-
             color: #c62828;
-
-            line-height: 1.5;
-        }
-
-
         .setup {
-
             color: #555;
-
             line-height: 1.6;
-        }
-
-
         .plakat-id {
-
-            margin-top: 20px;
-
             font-size: 13px;
-
             color: #999;
-        }
-
         .form-group {
             text-align: left;
             margin-bottom: 18px;
-        }
         
         .form-group label {
             display: block;
-            font-size: 14px;
-            font-weight: 600;
             margin-bottom: 7px;
-        }
-        
         .form-group input,
         .form-group textarea {
-            width: 100%;
             padding: 12px 13px;
-        
             border: 1px solid #ddd;
             border-radius: 9px;
-        
             font-size: 15px;
             font-family: inherit;
-        
             outline: none;
-        
             background: #fff;
-        }
-        
         .form-group input:focus,
         .form-group textarea:focus {
             border-color: #777;
-        }
-        
-        .form-group textarea {
             min-height: 80px;
             resize: vertical;
-        }
-        
         .help-text {
             font-size: 12px;
-            color: #777;
-            line-height: 1.5;
             margin-top: 6px;
-        }
-        
         .button {
-            width: 100%;
-        
             border: none;
-            border-radius: 9px;
-        
             padding: 13px;
-        
-            font-size: 15px;
-            font-weight: 600;
-        
             cursor: pointer;
-        
             margin-top: 5px;
-        }
-        
         .button-primary {
             background: #222;
             color: white;
-        }
-        
         .button-secondary {
             background: #eee;
             color: #333;
-        
-            margin-bottom: 18px;
-        }
-        
         .button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
-        }
-        
         .setup-title {
             font-size: 21px;
-            font-weight: 600;
             margin-bottom: 22px;
-        }
-        
         .setup-id {
-            font-size: 12px;
-            color: #999;
             margin-top: 18px;
-        }
-        
         .form-error {
             display: none;
-        
             background: #fff0f0;
-        
-            color: #c62828;
-        
             border-radius: 8px;
-        
             padding: 10px;
-        
             margin-bottom: 15px;
-        
-            font-size: 13px;
-        
-            text-align: left;
-        }
-        
         .form-success {
-            text-align: center;
-        }
-
         /* =========================================
            SETTING BUTTON
            ========================================= */
-        
         .setting-button {
             position: absolute;
-        
             right: 10px;
             bottom: 8px;
-        
             width: 28px;
             height: 28px;
-        
-            border: none;
             background: transparent;
-        
             color: #bbb;
-        
-            font-size: 15px;
-        
             opacity: 0.35;
-        
-            cursor: pointer;
-        
-            padding: 0;
-        }
-        
         .setting-button:hover {
             opacity: 0.8;
-        }
-        
-        
-        /* =========================================
            SETTING / EDIT
-           ========================================= */
-        
         .setting-area {
             position: relative;
             padding-top: 5px;
-        }
-        
-        
         .setting-title {
-            font-size: 21px;
-            font-weight: 600;
-        
-            margin-bottom: 22px;
-        }
-        
-        
-        .form-group {
-            text-align: left;
-            margin-bottom: 18px;
-        }
-        
-        
-        .form-group label {
-            display: block;
-        
-            font-size: 14px;
-            font-weight: 600;
-        
-            margin-bottom: 7px;
-        }
-        
-        
-        .form-group input,
-        .form-group textarea {
-            width: 100%;
-        
-            padding: 12px 13px;
-        
-            border: 1px solid #ddd;
-            border-radius: 9px;
-        
-            font-size: 15px;
-            font-family: inherit;
-        
-            outline: none;
-        
-            background: #fff;
-        }
-        
-        
-        .form-group input:focus,
-        .form-group textarea:focus {
-            border-color: #777;
-        }
-        
-        
-        .form-group textarea {
-            min-height: 80px;
-            resize: vertical;
-        }
-        
-        
-        .button {
-            width: 100%;
-        
-            border: none;
-            border-radius: 9px;
-        
-            padding: 13px;
-        
-            font-size: 15px;
-            font-weight: 600;
-        
-            cursor: pointer;
-        
-            margin-top: 5px;
-        }
-        
-        
-        .button-primary {
-            background: #222;
-            color: white;
-        }
-        
-        
-        .button-secondary {
-            background: #eee;
-            color: #333;
-        }
-        
-        
-        .button:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        
-        .form-error {
-            display: none;
-        
-            background: #fff0f0;
-        
-            color: #c62828;
-        
-            border-radius: 8px;
-        
-            padding: 10px;
-        
-            margin-bottom: 15px;
-        
-            font-size: 13px;
-        
-            text-align: left;
-        }
-        
-        
         .pin-description {
-            font-size: 12px;
-        
-            color: #777;
-        
-            line-height: 1.5;
-        
-            margin-top: 6px;
-        }
-
     </style>
-
 </head>
-
-
 <body>
-
 <div class="container">
-
     <h1>Google Review NFC</h1>
-
     <div id="content">
-
         <div class="message">
-
             <div class="spinner"></div>
-
             <div>
                 Memeriksa plakat...
             </div>
-
         </div>
-
     </div>
-
 </div>
-
-
 <script>
-
-
 // =====================================================
 // KONFIGURASI
-// =====================================================
-
 const API_URL =
     "https://script.google.com/macros/s/AKfycbySSJ0dGfVTD7A8Olvkkmi_RMbu3UVeYd6Gxlo6hPfDHPFyyVl5huz1HwIHO9Rly2XI/exec";
-
-
-// =====================================================
 // AMBIL ID PLAKAT
-// =====================================================
-
 const params = new URLSearchParams(
     window.location.search
 );
-
 const plakatId = params.get("id");
-
-
-// =====================================================
 // ELEMENT
-// =====================================================
-
 const content =
     document.getElementById("content");
-
-
-// =====================================================
 // CEK ID
-// =====================================================
-
 if (!plakatId) {
-
     content.innerHTML = `
-
-        <div class="message">
-
             <div class="error">
-
                 ID plakat tidak ditemukan.
-
-            </div>
-
-        </div>
-
     `;
-
 } else {
-
     getPlakat();
-
 }
-
-
-// =====================================================
 // GET DATA PLAKAT
-// =====================================================
-
 async function getPlakat() {
-
     try {
-
         const response = await fetch(
-
             API_URL +
             "?action=get&id=" +
             encodeURIComponent(plakatId)
-
         );
-
-
         const data =
             await response.json();
-
-
         // =============================================
         // ID TIDAK DITEMUKAN
-        // =============================================
-
         if (data.status === "not_found") {
-
             content.innerHTML = `
-
                 <div class="message">
-
                     <div class="error">
-
                         Plakat tidak ditemukan.
-
                     </div>
-
                 </div>
-
             `;
-
             return;
-
-        }
-
-
-        // =============================================
         // ERROR
-        // =============================================
-
         if (data.status !== "success") {
-
             throw new Error(
                 data.message ||
                 "Terjadi kesalahan."
             );
-
-        }
-
-
-        // =============================================
         // BELUM TERDAFTAR
-        // =============================================
-
         if (!data.pin_exist) {
-
             showRegistrationForm(data);
-        
-            return;
-        }
-
         let redirectTimer = null;
-
-        // =============================================
         // SUDAH TERDAFTAR
-        // =============================================
-
         startRedirect(data);
-
     }
-
-
     catch (error) {
-
         console.error(error);
-
         content.innerHTML = `
-
             <div class="message">
-
                 <div class="error">
-
                     Gagal menghubungi server.
-
                     <br><br>
-
                     Silakan coba lagi.
-
-                </div>
-
-            </div>
-
         `;
-
-    }
-
-}
-
 function showRegistrationForm(data) {
-
-    content.innerHTML = `
-
-        <div class="message">
-
             <div class="setup-title">
                 Konfigurasi Plakat
-            </div>
-
-
             <div class="form-error" id="formError"></div>
-
-
             <div class="form-group">
-
                 <label for="namaUsaha">
                     Nama usaha
                 </label>
-
                 <input
                     type="text"
                     id="namaUsaha"
                     placeholder="Contoh: Toko ABC"
                     autocomplete="organization"
                 >
-
-            </div>
-
-
-            <div class="form-group">
-
                 <label for="alamatUsaha">
                     Alamat usaha
-                </label>
-
                 <textarea
                     id="alamatUsaha"
                     placeholder="Contoh: Jl. Sudirman No. 10, Palembang"
                 ></textarea>
-
-            </div>
-
-
             <button
                 class="button button-secondary"
                 onclick="openGoogleMapsSearch()"
             >
                 Cari di Google Maps
             </button>
-
-
-            <div class="form-group">
-
                 <label for="mapsUrl">
                     Link Google Maps
-                </label>
-
-                <input
                     type="url"
                     id="mapsUrl"
                     placeholder="Tempel link Google Maps di sini"
                     autocomplete="off"
-                >
-
                 <div class="help-text">
-
                     Cari usaha di Google Maps, pilih titik
                     yang benar, lalu salin link Google Maps
                     dan tempel di sini.
-
-                </div>
-
-            </div>
-
-
-            <div class="form-group">
-
                 <label for="userPin">
                     PIN
-                </label>
-
-                <input
                     type="password"
                     id="userPin"
                     placeholder="Buat PIN"
                     inputmode="numeric"
                     autocomplete="new-password"
                     onkeydown="if(event.key === 'Enter'){ event.preventDefault(); registerPlakat(); }"
-                >
-
-                <div class="help-text">
-
                     PIN diperlukan jika Anda ingin
                     mengubah konfigurasi plakat nanti.
-
-                </div>
-
-            </div>
-
-
-            <button
                 class="button button-primary"
                 id="saveButton"
                 onclick="registerPlakat()"
-            >
                 SIMPAN
-            </button>
-
-
             <div class="setup-id">
-
                 ID Plakat:
                 ${escapeHtml(data.id_plakat)}
-
-            </div>
-
-        </div>
-
-    `;
-}
-
 function openGoogleMapsSearch() {
-
     const nama =
         document.getElementById("namaUsaha").value.trim();
-
     const alamat =
         document.getElementById("alamatUsaha").value.trim();
-
-
     if (!nama && !alamat) {
-
         showFormError(
             "Isi nama usaha atau alamat terlebih dahulu."
-        );
-
         return;
-    }
-
-
     const query =
         [nama, alamat]
             .filter(Boolean)
             .join(", ");
-
-
     const mapsSearchUrl =
         "https://www.google.com/maps/search/?api=1&query=" +
         encodeURIComponent(query);
-
-
     window.open(
         mapsSearchUrl,
         "_blank"
     );
-}
-
 async function registerPlakat() {
-
     const namaUsaha =
         document.getElementById("namaUsaha")
             .value
             .trim();
-
-
-    const alamat =
         document.getElementById("alamatUsaha")
-            .value
-            .trim();
-
-
     const mapsUrl =
         document.getElementById("mapsUrl")
-            .value
-            .trim();
-
-
     const pin =
         document.getElementById("userPin")
-            .value
-            .trim();
-
-
     // =============================================
     // VALIDASI
-    // =============================================
-
     if (!namaUsaha) {
-
-        showFormError(
             "Nama usaha belum diisi."
-        );
-
-        return;
-    }
-
-
     if (!alamat) {
-
-        showFormError(
             "Alamat usaha belum diisi."
-        );
-
-        return;
-    }
-
-
     if (!mapsUrl) {
-
-        showFormError(
             "Link Google Maps belum diisi."
-        );
-
-        return;
-    }
-
-
     if (!pin) {
-
-        showFormError(
             "PIN belum diisi."
-        );
-
-        return;
-    }
-
-
     if (pin.length < 4) {
-
-        showFormError(
             "PIN minimal 4 angka."
-        );
-
-        return;
-    }
-
-
-    // =============================================
     // TOMBOL
-    // =============================================
-
     const saveButton =
         document.getElementById("saveButton");
-
-
     saveButton.disabled = true;
-
     saveButton.textContent =
         "MENYIMPAN...";
-
-
-    // =============================================
     // DATA
-    // =============================================
-
     const data = {
-
         action: "register",
-
         id: plakatId,
-
         maps_url: mapsUrl,
-
         pin: pin,
-
         nama_usaha: namaUsaha,
-
         alamat: alamat
-
     };
-
-
-    try {
-
         const response =
             await fetch(API_URL, {
-
                 method: "POST",
-
                 headers: {
                     "Content-Type":
                         "text/plain;charset=utf-8"
                 },
-
                 body:
                     JSON.stringify(data)
-
             });
-
-
         const result =
-            await response.json();
-
-
         // =========================================
         // BERHASIL
-        // =========================================
-
         if (result.status === "registered") {
-
             showRegistrationSuccess(
                 result
-            );
-
-            return;
-        }
-
-
-        // =========================================
-        // SUDAH TERDAFTAR
-        // =========================================
-
         if (result.status === "already_registered") {
-
             showFormError(
                 "Plakat ini sudah dikonfigurasi."
-            );
-
             saveButton.disabled = false;
-
             saveButton.textContent =
                 "SIMPAN";
-
-            return;
-        }
-
-
-        // =========================================
-        // ERROR
-        // =========================================
-
-        showFormError(
             result.message ||
             "Gagal menyimpan konfigurasi."
-        );
-
-
         saveButton.disabled = false;
-
         saveButton.textContent =
             "SIMPAN";
-
-
     } catch (error) {
-
-        console.error(error);
-
-        showFormError(
             "Gagal menghubungi server."
-        );
-
-
-        saveButton.disabled = false;
-
-        saveButton.textContent =
-            "SIMPAN";
-
-    }
-
-}
-
 function showFormError(message) {
-
     const errorElement =
         document.getElementById("formError");
-
-
     if (!errorElement) {
-
         alert(message);
-
-        return;
-    }
-
-
     errorElement.textContent =
         message;
-
-
     errorElement.style.display =
         "block";
-
-}
-
 function showRegistrationSuccess(data) {
-
-    content.innerHTML = `
-
-        <div class="message">
-
             <div class="form-success">
-
                 <div class="setup-title">
-
                     Konfigurasi berhasil
-
-                </div>
-
-
                 <div class="business-name">
-
                     ${escapeHtml(
                         data.nama_usaha
                     )}
-
-                </div>
-
-
                 <div class="address">
-
-                    ${escapeHtml(
                         data.alamat
-                    )}
-
-                </div>
-
-
                 <div style="
                     margin-top:20px;
                     color:#555;
                     line-height:1.5;
                 ">
-
                     Plakat ini sekarang sudah
                     siap digunakan.
-
-                </div>
-
-
                 <div class="setup-id">
-
                     ID Plakat:
-                    ${escapeHtml(
                         data.id_plakat
-                    )}
-
-                </div>
-
-            </div>
-
-        </div>
-
-    `;
-
-}
     
-// =====================================================
 // REDIRECT
-// =====================================================
-
 function startRedirect(data) {
-
     const mapsUrl = data.maps_url;
-
-
-    if (!mapsUrl) {
-
-        content.innerHTML = `
-
-            <div class="message">
-
-                <div class="error">
-
                     Link Google Maps belum
                     dikonfigurasi.
-
-                </div>
-
-            </div>
-
-        `;
-
-        return;
-    }
-
-
-    content.innerHTML = `
-
         <div
             class="message"
             style="position:relative;"
         >
-
             <div class="business-name">
-
                 ${escapeHtml(data.nama_usaha)}
-
-            </div>
-
-
             <div class="address">
-
                 ${escapeHtml(data.alamat)}
-
-            </div>
-
-
-            <div class="spinner"></div>
-
-
-            <div>
-
                 Membuka Google Maps...
-
-            </div>
-
-
             <div class="countdown">
-
                 Mengarahkan dalam
                 <strong id="seconds">3</strong>
                 detik
-
-            </div>
-
-
             <!-- SETTING TERSEMBUNYI -->
-
-            <button
                 class="setting-button"
                 id="settingButton"
                 title="Pengaturan"
                 onclick="openPinScreen()"
-            >
                 ⚙
-            </button>
-
-        </div>
-
-    `;
-
-
     let seconds = 3;
-
-
    redirectTimer = setInterval(() => {
-
         seconds--;
-
-
         const secondsElement =
             document.getElementById("seconds");
-
-
         if (secondsElement) {
-
             secondsElement.textContent =
                 seconds;
-
-        }
-
-
         if (seconds <= 0) {
-
             clearInterval(redirectTimer);
-
             window.location.href = mapsUrl;
-
-        }
-
     }, 1000);
-}
-
     function openPinScreen() {
-
     // Hentikan redirect
     if (redirectTimer) {
-
         clearInterval(redirectTimer);
-
         redirectTimer = null;
-
-    }
-
-
-    content.innerHTML = `
-
-        <div class="message">
-
             <div class="setting-title">
-
                 Pengaturan Plakat
-
-            </div>
-
-
             <div
                 class="form-error"
                 id="pinError"
             ></div>
-
-
-            <div class="form-group">
-
                 <label for="editPin">
-
-                    PIN
-
-                </label>
-
-
-                <input
-                    type="password"
                     id="editPin"
                     placeholder="Masukkan PIN"
-                    inputmode="numeric"
-                    autocomplete="off"
                     onkeydown="if(event.key === 'Enter'){ event.preventDefault(); verifyPin(); }"
-                >
-
-
                 <div class="pin-description">
-
                     Masukkan PIN yang digunakan
                     saat konfigurasi plakat.
-
-                </div>
-
-            </div>
-
-
-            <button
-                class="button button-primary"
                 id="pinButton"
                 onclick="verifyPin()"
-            >
-
                 LANJUT
-
-            </button>
-
-        </div>
-
-    `;
-
-
     // Fokus otomatis ke PIN
-
     setTimeout(() => {
-
         const input =
             document.getElementById("editPin");
-
         if (input) {
             input.focus();
-        }
-
     }, 100);
-
-}
-
     async function verifyPin() {
-
-    const pin =
         document
             .getElementById("editPin")
-            .value
-            .trim();
-
-
-    if (!pin) {
-
         showPinError(
-            "PIN belum diisi."
-        );
-
-        return;
-    }
-
-
     const button =
         document.getElementById("pinButton");
-
-
     button.disabled = true;
-
     button.textContent =
         "MEMERIKSA...";
-
-
-    try {
-
-        const response =
-            await fetch(API_URL, {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-                },
-
                 body: JSON.stringify({
-
                     action: "verify_pin",
-
                     id: plakatId,
-
                     pin: pin
-
                 })
-
-            });
-
-
-        const result =
-            await response.json();
-
-
         if (result.status === "pin_valid") {
-
             sessionStorage.setItem(
                 "nfc_edit_pin_" + plakatId,
                 pin
-            );
-        
             showEditForm();
-        
-            return;
-        }
-
-
         if (result.status === "wrong_pin") {
-
             showPinError(
                 "PIN salah."
-            );
-
         } else {
-
-            showPinError(
                 result.message ||
                 "PIN tidak dapat diverifikasi."
-            );
-
-        }
-
-
         button.disabled = false;
-
         button.textContent =
             "LANJUT";
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        showPinError(
-            "Gagal menghubungi server."
-        );
-
-
-        button.disabled = false;
-
-        button.textContent =
-            "LANJUT";
-
-    }
-
-}
-
     function showPinError(message) {
-
     const element =
         document.getElementById("pinError");
-
-
     if (!element) {
-
-        alert(message);
-
-        return;
-
-    }
-
-
     element.textContent =
-        message;
-
-
     element.style.display =
-        "block";
-
-}
-
     async function showEditForm() {
-
-    try {
-
-        const response =
             await fetch(
                 API_URL +
                 "?action=get&id=" +
                 encodeURIComponent(plakatId)
-            );
-
-
-        const data =
-            await response.json();
-
-
-        if (data.status !== "success") {
-
-            content.innerHTML = `
-
-                <div class="message">
-
-                    <div class="error">
-
                         Data plakat tidak ditemukan.
-
-                    </div>
-
-                </div>
-
-            `;
-
-            return;
-        }
-
-
-        content.innerHTML = `
-
-            <div class="message">
-
                 <div class="setting-title">
                     Edit Plakat
-                </div>
-
-
                 <div
                     class="form-error"
                     id="editError"
                 ></div>
-
-
                 <!-- NAMA USAHA -->
-
                 <div class="form-group">
-
                     <label for="editNama">
                         Nama usaha
                     </label>
-
                     <input
                         type="text"
                         id="editNama"
@@ -1477,714 +513,243 @@ function startRedirect(data) {
                         )}"
                         autocomplete="organization"
                     >
-
-                </div>
-
-
                 <!-- ALAMAT -->
-
-                <div class="form-group">
-
                     <label for="editAlamat">
                         Alamat
-                    </label>
-
                     <textarea
                         id="editAlamat"
                     >${escapeHtml(
                         data.alamat || ""
                     )}</textarea>
-
-                </div>
-
-
                 <!-- LINK GOOGLE MAPS -->
-
-                <div class="form-group">
-
                     <label for="editMaps">
                         Link Google Maps
-                    </label>
-
-                    <input
                         type="url"
                         id="editMaps"
-                        value="${escapeHtml(
                             data.maps_url || ""
-                        )}"
                         autocomplete="url"
-                    >
-
-                </div>
-
-
                 <!-- PIN BARU -->
-
-                <div class="form-group">
-
                     <label for="editNewPin">
                         PIN baru
-                    </label>
-
-                    <input
                         type="password"
                         id="editNewPin"
                         placeholder="Kosongkan jika tidak ingin mengganti PIN"
                         inputmode="numeric"
                         autocomplete="new-password"
                         onkeydown="if(event.key === 'Enter'){ event.preventDefault(); saveEdit(); }"
-                    >
-
                     <div class="pin-description">
-
                         Kosongkan jika PIN tidak ingin
                         diubah. Jika Anda memasukkan
                         PIN baru, PIN lama tidak dapat
                         digunakan lagi.
-
-                    </div>
-
-                </div>
-
-
                 <!-- TOMBOL SIMPAN -->
-
                 <button
                     class="button button-primary"
                     id="editSaveButton"
                     onclick="saveEdit()"
-                >
-
                     SIMPAN PERUBAHAN
-
                 </button>
-
-            </div>
-
-        `;
-
-
-    } catch (error) {
-
-        console.error(error);
-
-        content.innerHTML = `
-
-            <div class="message">
-
-                <div class="error">
-
                     Gagal mengambil data plakat.
-
-                </div>
-
-            </div>
-
-        `;
-
-    }
-
-}
-
     async function saveEdit() {
-
-    const namaUsaha =
         document.getElementById("editNama").value.trim();
-
-    const alamat =
         document.getElementById("editAlamat").value.trim();
-
-    const mapsUrl =
         document.getElementById("editMaps").value.trim();
-
     const newPin =
         document.getElementById("editNewPin").value.trim();
-
-
     // =========================================
-    // VALIDASI
-    // =========================================
-
-    if (!namaUsaha) {
-
-        showEditError(
-            "Nama usaha belum diisi."
-        );
-
-        return;
-    }
-
-
-    if (!alamat) {
-
         showEditError(
             "Alamat belum diisi."
-        );
-
-        return;
-    }
-
-
-    if (!mapsUrl) {
-
-        showEditError(
-            "Link Google Maps belum diisi."
-        );
-
-        return;
-    }
-
-
-    // =========================================
     // JIKA PIN BARU DIISI
-    // =========================================
-
     if (newPin !== "") {
-
         // Hanya angka
         if (!/^\d+$/.test(newPin)) {
-
             showEditError(
                 "PIN baru hanya boleh berisi angka."
-            );
-
-            return;
-        }
-
-
         // Minimal 4 angka
         if (newPin.length < 4) {
-
-            showEditError(
                 "PIN baru minimal 4 angka."
-            );
-
-            return;
-        }
-
-
         // Simpan data sementara
         window.pendingEdit = {
-
             namaUsaha: namaUsaha,
-
             alamat: alamat,
-
             mapsUrl: mapsUrl,
-
             newPin: newPin
-
         };
-
-
         // Tampilkan peringatan
         confirmPinChange();
-
-        return;
-    }
-
-
-    // =========================================
     // PIN TIDAK DIGANTI
-    // =========================================
-
     saveEditToServer(
         namaUsaha,
         alamat,
         mapsUrl,
         ""
-    );
-
-}
-
    async function saveEditToServer(
     namaUsaha,
     alamat,
     mapsUrl,
     newPin
 ) {
-
-    const pin =
         sessionStorage.getItem(
             "nfc_edit_pin_" + plakatId
-        );
-
-    if (!pin) {
-
         alert(
             "Sesi PIN sudah berakhir. Silakan masukkan PIN kembali."
-        );
-
-        return;
-    }
-
-
     console.log("Mengirim data edit...");
-
-
-    try {
-
-        const response =
-            await fetch(API_URL, {
-
-                method: "POST",
-
-                headers: {
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-                },
-
-                body: JSON.stringify({
-
                     action: "edit",
-
-                    id: plakatId,
-
                     pin: pin,
-
                     new_pin: newPin,
-
                     maps_url: mapsUrl,
-
                     nama_usaha: namaUsaha,
-
                     alamat: alamat
-
-                })
-
-            });
-
-
         console.log(
             "Response diterima:",
             response.status
-        );
-
-
         const responseText =
             await response.text();
-
-
-        console.log(
             "Response server:",
             responseText
-        );
-
-
         let result;
-
         try {
-
             result =
                 JSON.parse(responseText);
-
         } catch (error) {
-
             console.error(
                 "Response bukan JSON:",
                 error
-            );
-
             alert(
                 "Server berhasil menerima data, " +
                 "tetapi response tidak dapat dibaca."
-            );
-
-            return;
-        }
-
-
-        console.log(
             "Hasil edit:",
             result
-        );
-
-
         // =====================================
-        // BERHASIL
-        // =====================================
-
         if (result.status === "updated") {
-
             // Jika PIN diganti,
             // simpan PIN baru ke session.
-
             if (newPin !== "") {
-
                 sessionStorage.setItem(
                     "nfc_edit_pin_" + plakatId,
                     newPin
                 );
-
-            }
-
-
             window.pendingEdit = null;
-
-
             showEditSuccess(result);
-
-
-            return;
-        }
-
-
-        // =====================================
         // PIN SALAH
-        // =====================================
-
-        if (result.status === "wrong_pin") {
-
-            alert(
                 "PIN lama tidak valid."
-            );
-
-            return;
-        }
-
-
-        // =====================================
         // ERROR DARI SERVER
-        // =====================================
-
-        alert(
-            result.message ||
             "Gagal menyimpan perubahan."
-        );
-
-
-    } catch (error) {
-
         console.error(
             "ERROR:",
             error
-        );
-
-        alert(
             "Gagal menghubungi server.\n\n" +
             error.message
-        );
-
-    }
-
-}
-    
     function showEditError(message) {
-
-    const element =
         document.getElementById("editError");
-
-
-    if (!element) {
-
-        alert(message);
-
-        return;
-
-    }
-
-
-    element.textContent =
-        message;
-
-
-    element.style.display =
-        "block";
-
-}
-
     function showEditSuccess(result) {
-
     console.log("showEditSuccess menerima:", result);
-
     const mapsUrl = result.maps_url || "";
     const namaUsaha = result.nama_usaha || "";
     const alamat = result.alamat || "";
-
-    content.innerHTML = `
-
-        <div class="message">
-
             <div class="success-title">
                 Berhasil disimpan
-            </div>
-
-            <div class="business-name">
                 ${escapeHtml(namaUsaha)}
-            </div>
-
-            <div class="address">
                 ${escapeHtml(alamat)}
-            </div>
-
             <div class="success-message">
                 Informasi plakat telah berhasil diperbarui.
-            </div>
-
             <div class="redirect-message">
-                Membuka Google Maps...
-            </div>
-
-            <div class="countdown">
-                Mengarahkan dalam
                 <strong id="successSeconds">2</strong>
-                detik
-            </div>
-
-        </div>
-
-    `;
-
     let seconds = 2;
-
     const countdown = setInterval(function () {
-
-        seconds--;
-
         const element =
             document.getElementById("successSeconds");
-
         if (!element) {
-
             clearInterval(countdown);
-            return;
-
-        }
-
         if (seconds > 0) {
-
             element.textContent = seconds;
-            return;
-
-        }
-
         clearInterval(countdown);
-
         if (mapsUrl) {
-
             console.log(
                 "Redirect ke Google Maps:",
                 mapsUrl
-            );
-
-            window.location.href = mapsUrl;
-
-        } else {
-
             console.warn(
                 "maps_url kosong"
-            );
-
             window.location.href =
                 "?id=" +
                 encodeURIComponent(plakatId);
-
-        }
-
-    }, 1000);
-
-}
-
 function confirmPinChange() {
-
     const data = window.pendingEdit;
-
     if (!data) {
-        return;
-    }
-
-
-    content.innerHTML = `
-
-        <div class="message">
-
-            <div class="setting-title">
                 ⚠️ Ganti PIN?
-            </div>
-
-
             <div style="
                 text-align:left;
                 line-height:1.6;
                 color:#555;
                 margin-bottom:20px;
             ">
-
                 Anda memasukkan PIN baru.
-
                 <br><br>
-
                 Jika PIN diganti,
                 <strong>PIN lama tidak dapat
                 digunakan lagi</strong>
                 untuk mengedit plakat ini.
-
-                <br><br>
-
                 Pastikan Anda mengingat
                 PIN baru sebelum melanjutkan.
-
-            </div>
-
-
-            <div
                 id="pinCountdown"
                 style="
                     margin-bottom:15px;
                     font-size:14px;
                     color:#777;
                 "
-            >
-
                 Tombol akan aktif dalam
                 <strong>3</strong> detik...
-
-            </div>
-
-
-            <button
-                class="button button-secondary"
                 onclick="cancelPinChange()"
-            >
                 BATAL
-            </button>
-
-
-            <button
-                class="button button-primary"
                 id="confirmPinButton"
                 disabled
                 onclick="executeEditWithNewPin()"
-            >
                 GANTI PIN
-            </button>
-
-        </div>
-
-    `;
-
-
-    let seconds = 3;
-
-
     const countdown =
         setInterval(function () {
-
             seconds--;
-
-
             const element =
                 document.getElementById(
                     "pinCountdown"
-                );
-
-
             if (!element) {
-
                 clearInterval(countdown);
-
                 return;
-            }
-
-
             if (seconds > 0) {
-
                 element.innerHTML =
                     `Tombol akan aktif dalam
                     <strong>${seconds}</strong>
                     detik...`;
-
             } else {
-
-                clearInterval(countdown);
-
-
-                element.innerHTML =
                     "Pastikan PIN baru sudah benar.";
-
-
                 const button =
                     document.getElementById(
                         "confirmPinButton"
                     );
-
-
                 if (button) {
-
                     button.disabled = false;
-
                 }
-
-            }
-
         }, 1000);
-
-}
-
     function cancelPinChange() {
-
     window.pendingEdit = null;
-
     showEditForm();
-
-}
-
     function executeEditWithNewPin() {
-
     const data =
         window.pendingEdit;
-
-
-    if (!data) {
-
-        return;
-
-    }
-
-
-    saveEditToServer(
-
         data.namaUsaha,
-
         data.alamat,
-
         data.mapsUrl,
-
         data.newPin
-
-    );
-
-}
-    
-// =====================================================
 // ESCAPE HTML
-// =====================================================
-
 function escapeHtml(value) {
-
     if (value === null ||
         value === undefined) {
-
         return "";
-
-    }
-
-
     return String(value)
-
         .replace(/&/g, "&amp;")
-
         .replace(/</g, "&lt;")
-
         .replace(/>/g, "&gt;")
-
         .replace(/"/g, "&quot;")
-
         .replace(/'/g, "&#039;");
-
-}
-
 </script>
-
 </body>
 </html>
