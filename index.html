@@ -186,10 +186,11 @@ async function getPlakat() {
             "?action=get&id=" +
             encodeURIComponent(plakatId)
         );
-        const data =
-            await response.json();
+        const data = await response.json();
+
         // =============================================
         // ID TIDAK DITEMUKAN
+        // =============================================
         if (data.status === "not_found") {
             content.innerHTML = `
                 <div class="message">
@@ -199,28 +200,48 @@ async function getPlakat() {
                 </div>
             `;
             return;
-        // ERROR
+        }
+
+        // =============================================
+        // ERROR DARI SERVER
+        // =============================================
         if (data.status !== "success") {
             throw new Error(
                 data.message ||
                 "Terjadi kesalahan."
             );
+
+        }
+
+        // =============================================
         // BELUM TERDAFTAR
+        // =============================================
         if (!data.pin_exist) {
+
             showRegistrationForm(data);
-        let redirectTimer = null;
+
+            return;
+        }
+        
+        // =============================================
         // SUDAH TERDAFTAR
+        // =============================================
         startRedirect(data);
-    }
-    catch (error) {
+    } catch (error) {
         console.error(error);
         content.innerHTML = `
             <div class="message">
                 <div class="error">
                     Gagal menghubungi server.
-                    <br><br>
+                </div>
+                <br>
+                <div>
                     Silakan coba lagi.
+                </div>
+            </div>
         `;
+    }
+}
 function showRegistrationForm(data) {
             <div class="setup-title">
                 Konfigurasi Plakat
