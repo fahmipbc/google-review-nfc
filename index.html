@@ -32,6 +32,7 @@
             max-width: 420px;
             padding: 30px 20px;
             text-align: center;
+		}
         h1 {
             margin: 0 0 30px;
             font-size: 28px;
@@ -296,6 +297,7 @@ const plakatId = params.get("id");
 // =====================================================
 const content =
     document.getElementById("content");
+let redirectTimer = null;
 // =====================================================
 // CEK ID
 // =====================================================
@@ -320,8 +322,7 @@ async function getPlakat() {
             "?action=get&id=" +
             encodeURIComponent(plakatId)
         );
-        const data =
-            await response.json();
+		const data = await response.json();
         // =============================================
         // ID TIDAK DITEMUKAN
 		// =============================================
@@ -335,7 +336,6 @@ async function getPlakat() {
             `;
             return;
         }
-
         // =============================================
         // ERROR
         // =============================================
@@ -350,7 +350,8 @@ async function getPlakat() {
         // =============================================
         if (!data.pin_exist) {
             showRegistrationForm(data);
-        let redirectTimer = null;
+			return;
+		}
          // =============================================
         // SUDAH TERDAFTAR
         // =============================================
@@ -458,7 +459,7 @@ function openGoogleMapsSearch() {
     if (!nama && !alamat) {
         showFormError(
             "Isi nama usaha atau alamat terlebih dahulu."
-		};
+		);
         return;
 	}
     const query =
@@ -517,12 +518,18 @@ async function registerPlakat() {
         );
         return;
     }
-    if (pin.length < 4) {
-        showFormError(
-            "PIN minimal 4 angka."
-        );
-        return;
-    }
+   if (!/^\d+$/.test(pin)) {
+	    showFormError(
+	        "PIN hanya boleh berisi angka."
+	    );
+	    return;
+	}
+	if (pin.length < 4) {
+	    showFormError(
+	        "PIN minimal 4 angka."
+	    );
+	    return;
+	}
     // =============================================
     // TOMBOL
     // =============================================
@@ -561,7 +568,7 @@ async function registerPlakat() {
         if (result.status === "registered") {
             showRegistrationSuccess(
                 result
-			};
+			);
 			return;
 		}
 		// =========================================
@@ -570,7 +577,7 @@ async function registerPlakat() {
         if (result.status === "already_registered") {
             showFormError(
                 "Plakat ini sudah dikonfigurasi."
-			};
+			);
             saveButton.disabled = false;
             saveButton.textContent =
                 "SIMPAN";
@@ -582,7 +589,7 @@ async function registerPlakat() {
         showFormError(
             result.message ||
             "Gagal menyimpan konfigurasi."
-		};
+		);
         saveButton.disabled = false;
         saveButton.textContent =
             "SIMPAN";
@@ -590,7 +597,7 @@ async function registerPlakat() {
 		console.error(error);
         showFormError(
             "Gagal menghubungi server."
-		};
+		);
 		saveButton.disabled = false;
         saveButton.textContent =
             "SIMPAN";
@@ -788,6 +795,7 @@ async function verifyPin() {
                     pin: pin
                 })
 			});
+		const result = await response.json();
         if (result.status === "pin_valid") {
             sessionStorage.setItem(
                 "nfc_edit_pin_" + plakatId,
@@ -834,30 +842,16 @@ function showPinError(message) {
 }
 async function showEditForm() {
     try {
-        const response =
-            await fetch(
-                API_URL +
-                "?action=get&id=" +
-                encodeURIComponent(plakatId)
-            );
-        const data =
-            await response.json();
+        const response = await fetch(
+            API_URL +
+            "?action=get&id=" +
+            encodeURIComponent(plakatId)
+        );
+        const data = await response.json();
         if (data.status !== "success") {
             content.innerHTML = `
                 <div class="message">
                     <div class="error">
-            "LANJUT";
-    function showPinError(message) {
-    const element =
-        document.getElementById("pinError");
-    if (!element) {
-    element.textContent =
-    element.style.display =
-    async function showEditForm() {
-            await fetch(
-                API_URL +
-                "?action=get&id=" +
-                encodeURIComponent(plakatId)
                         Data plakat tidak ditemukan.
                     </div>
                 </div>
@@ -873,7 +867,6 @@ async function showEditForm() {
                     class="form-error"
                     id="editError"
                 ></div>
-                <!-- NAMA USAHA -->
                 <div class="form-group">
                     <label for="editNama">
                         Nama usaha
@@ -881,23 +874,18 @@ async function showEditForm() {
                     <input
                         type="text"
                         id="editNama"
-@@ -1477,714 +513,243 @@ <h1>Google Review NFC</h1>
-                        )}"
+                        value="${escapeHtml(data.nama_usaha || "")}"
                         autocomplete="organization"
                     >
                 </div>
-                <!-- ALAMAT -->
                 <div class="form-group">
                     <label for="editAlamat">
                         Alamat
                     </label>
                     <textarea
                         id="editAlamat"
-                    >${escapeHtml(
-                        data.alamat || ""
-                    )}</textarea>
+                    >${escapeHtml(data.alamat || "")}</textarea>
                 </div>
-                <!-- LINK GOOGLE MAPS -->
                 <div class="form-group">
                     <label for="editMaps">
                         Link Google Maps
@@ -905,13 +893,10 @@ async function showEditForm() {
                     <input
                         type="url"
                         id="editMaps"
-                        value="${escapeHtml(
-                            data.maps_url || ""
-                        )}"
+                        value="${escapeHtml(data.maps_url || "")}"
                         autocomplete="url"
                     >
                 </div>
-                <!-- PIN BARU -->
                 <div class="form-group">
                     <label for="editNewPin">
                         PIN baru
@@ -926,12 +911,10 @@ async function showEditForm() {
                     >
                     <div class="pin-description">
                         Kosongkan jika PIN tidak ingin
-                        diubah. Jika Anda memasukkan
-                        PIN baru, PIN lama tidak dapat
-                        digunakan lagi.
+                        diubah. Jika Anda memasukkan PIN baru,
+                        PIN lama tidak dapat digunakan lagi.
                     </div>
                 </div>
-                <!-- TOMBOL SIMPAN -->
                 <button
                     class="button button-primary"
                     id="editSaveButton"
@@ -942,7 +925,10 @@ async function showEditForm() {
             </div>
         `;
     } catch (error) {
-        console.error(error);
+        console.error(
+            "showEditForm error:",
+            error
+        );
         content.innerHTML = `
             <div class="message">
                 <div class="error">
