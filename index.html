@@ -492,6 +492,321 @@ function initPlaceSearch() {
         );
     });
 }
+function initEditPlaceSearch() {
+
+    const input =
+        document.getElementById("editNama");
+
+    if (!input) {
+        return;
+    }
+
+
+    input.addEventListener(
+        "input",
+        function () {
+
+            clearTimeout(
+                autocompleteTimeout
+            );
+
+            const query =
+                input.value.trim();
+
+
+            // User mulai mengetik ulang
+            // berarti lokasi lama tidak lagi dipilih
+
+            window.selectedEditPlace = null;
+
+
+            if (query.length < 2) {
+
+                hideEditPlaceResults();
+
+                return;
+            }
+
+
+            autocompleteTimeout =
+                setTimeout(
+                    () => searchEditPlaces(query),
+                    300
+                );
+
+        }
+    );
+}
+async function searchEditPlaces(query) {
+
+    const resultsElement =
+        document.getElementById(
+            "editPlaceResults"
+        );
+
+    if (!resultsElement) {
+        return;
+    }
+
+
+    try {
+
+        const { AutocompleteSuggestion } =
+            await google.maps.importLibrary(
+                "places"
+            );
+
+
+        const request = {
+
+            input: query,
+
+            includedRegionCodes: ["id"],
+
+            language: "id"
+
+        };
+
+
+        const {
+            suggestions
+        } =
+            await AutocompleteSuggestion
+                .fetchAutocompleteSuggestions(
+                    request
+                );
+
+
+        resultsElement.innerHTML = "";
+
+
+        const places =
+            suggestions
+                .filter(
+                    item =>
+                        item.placePrediction
+                )
+                .slice(0, 5);
+
+
+        if (places.length === 0) {
+
+            hideEditPlaceResults();
+
+            return;
+        }
+
+
+        places.forEach(
+            item => {
+
+                const prediction =
+                    item.placePrediction;
+
+
+                const div =
+                    document.createElement(
+                        "div"
+                    );
+
+
+                div.className =
+                    "place-result";
+
+
+                div.innerHTML = `
+
+                    <div class="place-result-name">
+
+                        ${escapeHtml(
+                            prediction.mainText?.text || ""
+                        )}
+
+                    </div>
+
+                    <div class="place-result-address">
+
+                        ${escapeHtml(
+                            prediction.secondaryText?.text || ""
+                        )}
+
+                    </div>
+
+                `;
+
+
+                div.addEventListener(
+                    "click",
+                    () =>
+                        selectEditPlace(
+                            prediction
+                        )
+                );
+
+
+                resultsElement.appendChild(
+                    div
+                );
+
+            }
+        );
+
+
+        resultsElement.style.display =
+            "block";
+
+
+    } catch (error) {
+
+        console.error(
+            "Edit place search error:",
+            error
+        );
+
+        hideEditPlaceResults();
+
+    }
+}
+async function selectEditPlace(
+    prediction
+) {
+
+    const input =
+        document.getElementById(
+            "editNama"
+        );
+
+    const addressInput =
+        document.getElementById(
+            "editAlamat"
+        );
+
+    const resultsElement =
+        document.getElementById(
+            "editPlaceResults"
+        );
+
+
+    if (!prediction.placeId) {
+        return;
+    }
+
+
+    try {
+
+        const { Place } =
+            await google.maps.importLibrary(
+                "places"
+            );
+
+
+        const place =
+            new Place({
+                id: prediction.placeId
+            });
+
+
+        await place.fetchFields({
+
+            fields: [
+                "id",
+                "displayName",
+                "formattedAddress"
+            ]
+
+        });
+
+
+        window.selectedEditPlace = {
+
+            placeId:
+                place.id,
+
+            nama:
+                place.displayName?.text ||
+                prediction.mainText?.text ||
+                "",
+
+            alamat:
+                place.formattedAddress ||
+                prediction.secondaryText?.text ||
+                ""
+
+        };
+
+
+        // =========================================
+        // ISI FORM
+        // =========================================
+
+        input.value =
+            window.selectedEditPlace.nama;
+
+
+        addressInput.value =
+            window.selectedEditPlace.alamat;
+
+
+        // =========================================
+        // TAMPILKAN LOKASI YANG DIPILIH
+        // =========================================
+
+        resultsElement.innerHTML = `
+
+            <div class="place-selected">
+
+                <strong>
+                    ${escapeHtml(
+                        window.selectedEditPlace.nama
+                    )}
+                </strong>
+
+                <br>
+
+                ${escapeHtml(
+                    window.selectedEditPlace.alamat
+                )}
+
+            </div>
+
+        `;
+
+
+        resultsElement.style.display =
+            "block";
+
+
+    } catch (error) {
+
+        console.error(
+            "Select edit place error:",
+            error
+        );
+
+        showEditError(
+            "Data lokasi usaha tidak dapat diambil."
+        );
+
+    }
+}
+function hideEditPlaceResults() {
+
+    const element =
+        document.getElementById(
+            "editPlaceResults"
+        );
+
+
+    if (!element) {
+        return;
+    }
+
+
+    element.innerHTML = "";
+
+    element.style.display =
+        "none";
+}
 async function searchPlaces(query) {
 
     const resultsElement =
@@ -1030,6 +1345,20 @@ async function showEditForm() {
             `;
             return;
         }
+        // =========================================
+        // SIMPAN PLACE ID LAMA
+        // =========================================
+        window.selectedEditPlace = {
+            placeId:
+                data.place_id || "",
+            nama:
+                data.nama_usaha || "",
+            alamat:
+                data.alamat || ""
+        };
+        // =========================================
+        // FORM EDIT
+        // =========================================
         content.innerHTML = `
             <div class="message">
                 <div class="setting-title">
@@ -1039,6 +1368,9 @@ async function showEditForm() {
                     class="form-error"
                     id="editError"
                 ></div>
+                <!-- ================================= -->
+                <!-- NAMA USAHA / GOOGLE MAPS -->
+                <!-- ================================= -->
                 <div class="form-group">
                     <label for="editNama">
                         Nama usaha
@@ -1047,39 +1379,29 @@ async function showEditForm() {
                         type="text"
                         id="editNama"
                         value="${escapeHtml(data.nama_usaha || "")}"
-                        autocomplete="organization"
+                        placeholder="Contoh: Toko ABC"
+                        autocomplete="off"
                     >
+                    <div
+                        id="editPlaceResults"
+                        class="place-results"
+                    ></div>
                 </div>
+                <!-- ================================= -->
+                <!-- ALAMAT -->
+                <!-- ================================= -->
                 <div class="form-group">
                     <label for="editAlamat">
                         Alamat
                     </label>
                     <textarea
                         id="editAlamat"
+                        readonly
                     >${escapeHtml(data.alamat || "")}</textarea>
                 </div>
-                <div class="form-group">
-                    <label for="editNama">
-					    Nama usaha
-					</label>
-					<input
-					    type="text"
-					    id="editNama"
-					    value="${escapeHtml(data.nama_usaha || "")}"
-					    autocomplete="off"
-					>
-					
-					<div
-					    id="editPlaceResults"
-					    class="place-results"
-					></div>
-					
-					<div
-					    id="editPlaceSelected"
-					    class="place-selected"
-					    style="display:none;"
-					></div>
-                </div>
+                <!-- ================================= -->
+                <!-- PIN BARU -->
+                <!-- ================================= -->
                 <div class="form-group">
                     <label for="editNewPin">
                         PIN baru
@@ -1094,10 +1416,16 @@ async function showEditForm() {
                     >
                     <div class="pin-description">
                         Kosongkan jika PIN tidak ingin
-                        diubah. Jika Anda memasukkan PIN baru,
-                        PIN lama tidak dapat digunakan lagi.
+                        diubah.
+						
+                        Jika Anda memasukkan PIN baru,
+                        PIN lama tidak dapat digunakan
+                        lagi.
                     </div>
                 </div>
+                <!-- ================================= -->
+                <!-- TOMBOL -->
+                <!-- ================================= -->
                 <button
                     class="button button-primary"
                     id="editSaveButton"
@@ -1107,6 +1435,10 @@ async function showEditForm() {
                 </button>
             </div>
         `;
+        // =========================================
+        // AKTIFKAN PENCARIAN GOOGLE MAPS
+        // =========================================
+        initEditPlaceSearch();
     } catch (error) {
         console.error(
             "showEditForm error:",
