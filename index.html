@@ -313,9 +313,11 @@
 		    color: #555;
 		}
     </style>
+	<script>
+	    const currentOrigin = window.location.origin;
+	</script>
 	<script
-		const currentOrigin = window.location.origin;
-	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAnthbTl0zHrF8PGobNyIlo8lFWv7AtVYk&libraries=places&loading=async"
+	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAnthbTl0zHrF8PGobNyIlo8lFWv7AtYV&libraries=places&loading=async"
 	    async>
 	</script>
 </head>
@@ -370,12 +372,12 @@ if (!plakatId) {
 // =====================================================
 async function getPlakat() {
     try {
-       const response = await fetch(
-            API_URL +
-            "?action=get&id=" +
-            encodeURIComponent(plakatId) +
-            "&token=" + encodeURIComponent("PlakatNfcFahmi2026!X")
-        );
+       cconst response = await fetch(
+		    API_URL +
+		    "?action=get&id=" +
+		    encodeURIComponent(plakatId)
+		);
+
         const data = await response.json();
         if (data.status === "not_found") {
             content.innerHTML = `
@@ -1023,12 +1025,12 @@ async function registerPlakat() {
 	    place_id: selectedPlace.placeId,
 	    pin: pin,
 	    nama_usaha: selectedPlace.nama,
-	    alamat: selectedPlace.alamat,
-	    token: "PlakatNfcFahmi2026!X" // <- Tambahkan baris token ini
+	    alamat: selectedPlace.alamat
 	};
+
 	try {
         const response =
-            await fetch(API_URL + "?origin=" + encodeURIComponent(currentOrigin), {
+            await fetch(API_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type":
@@ -1261,19 +1263,18 @@ async function verifyPin() {
     button.textContent =
         "MEMERIKSA...";
 	try {
-        const response =
-            await fetch(API_URL + "?origin=" + encodeURIComponent(currentOrigin), {
-                method: "POST",
-                headers: {
-                    "Content-Type":
-                        "text/plain;charset=utf-8"
-                },
-                body: JSON.stringify({
-                    action: "verify_pin",
-                    id: plakatId,
-                    pin: pin
-                })
-			});
+		const data = {
+		    action: "verify_pin",
+		    id: plakatId,
+		    pin: pin,
+		};
+		
+		const response = await fetch(API_URL, {
+		    method: "POST",
+		    headers: { "Content-Type": "text/plain;charset=utf-8" },
+		    body: JSON.stringify(data)
+		});
+
 		const result = await response.json();
         if (result.status === "pin_valid") {
             sessionStorage.setItem(
@@ -1322,11 +1323,10 @@ function showPinError(message) {
 async function showEditForm() {
     try {
         const response = await fetch(
-            API_URL +
-            "?action=get&id=" +
-            encodeURIComponent(plakatId) +
-            "&token=" + encodeURIComponent("PlakatNfcFahmi2026!X")
-        );
+		    API_URL +
+		    "?action=get&id=" +
+		    encodeURIComponent(plakatId)
+		);
 
         const data = await response.json();
 
@@ -1700,7 +1700,7 @@ async function saveEditToServer(
     console.log("Mengirim data edit...");
     try {
         const response =
-            await fetch(API_URL + "?origin=" + encodeURIComponent(currentOrigin), {
+            await fetch(API_URL, {
                 method: "POST",
                 headers: {
                     "Content-Type":
