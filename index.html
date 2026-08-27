@@ -374,7 +374,7 @@ async function getPlakat() {
             API_URL +
             "?action=get&id=" +
             encodeURIComponent(plakatId) +
-            "&origin=" + encodeURIComponent(currentOrigin)
+            "&token=" + encodeURIComponent("PlakatNfcFahmi2026!X")
         );
         const data = await response.json();
         if (data.status === "not_found") {
@@ -1023,7 +1023,8 @@ async function registerPlakat() {
 	    place_id: selectedPlace.placeId,
 	    pin: pin,
 	    nama_usaha: selectedPlace.nama,
-	    alamat: selectedPlace.alamat
+	    alamat: selectedPlace.alamat,
+	    token: "PlakatNfcFahmi2026!X" // <- Tambahkan baris token ini
 	};
 	try {
         const response =
@@ -1323,7 +1324,8 @@ async function showEditForm() {
         const response = await fetch(
             API_URL +
             "?action=get&id=" +
-            encodeURIComponent(plakatId)
+            encodeURIComponent(plakatId) +
+            "&token=" + encodeURIComponent("PlakatNfcFahmi2026!X")
         );
 
         const data = await response.json();
