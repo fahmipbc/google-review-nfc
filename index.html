@@ -1353,159 +1353,187 @@ async function showEditForm() {
         };
 
         // =========================================
-        // FORM EDIT
-        // =========================================
-
-        content.innerHTML = `
-            <div class="message">
-
-                <div class="setting-title">
-                    Edit Plakat
-                </div>
-
-                <div
-                    class="form-error"
-                    id="editError"
-                ></div>
-
-                <!-- ================================= -->
-                <!-- INFORMASI TOKO -->
-                <!-- ================================= -->
-
-                <div
-                    style="
-                        text-align:left;
-                        margin-bottom:20px;
-                        padding:13px;
-                        background:#f5f5f5;
-                        border-radius:9px;
-                    "
-                >
-                    <div
-                        style="
-                            font-size:13px;
-                            color:#777;
-                            margin-bottom:5px;
-                        "
-                    >
-                        Informasi toko saat ini
-                    </div>
-
-                    <div
-                        style="
-                            font-size:15px;
-                            font-weight:600;
-                            color:#222;
-                        "
-                    >
-                        ${escapeHtml(data.nama_usaha || "")}
-                    </div>
-
-                    <div
-                        style="
-                            margin-top:4px;
-                            font-size:13px;
-                            color:#666;
-                            line-height:1.4;
-                        "
-                    >
-                        ${escapeHtml(data.alamat || "")}
-                    </div>
-                </div>
-
-
-                <!-- ================================= -->
-                <!-- NAMA USAHA / GOOGLE MAPS -->
-                <!-- ================================= -->
-
-                <div class="form-group">
-
-                    <label for="editNama">
-                        Pilih usaha Google Maps
-                    </label>
-
-                    <input
-                        type="text"
-                        id="editNama"
-                        value=""
-                        placeholder="Cari nama usaha di Google Maps"
-                        autocomplete="off"
-                    >
-
-                    <div
-                        id="editPlaceResults"
-                        class="place-results"
-                    ></div>
-
-                    <div class="help-text">
-                        Pilih usaha dari hasil pencarian
-                        Google Maps untuk mengganti
-                        lokasi plakat.
-                    </div>
-
-                </div>
-
-
-                <!-- ================================= -->
-                <!-- LOKASI TERPILIH -->
-                <!-- ================================= -->
-
-                <div
-                    id="editSelectedPlace"
-                    style="display:none;"
-                ></div>
-
-
-                <!-- ================================= -->
-                <!-- PIN BARU -->
-                <!-- ================================= -->
-
-                <div class="form-group">
-
-                    <label for="editNewPin">
-                        Ganti PIN
-                    </label>
-
-                    <input
-                        type="password"
-                        id="editNewPin"
-                        placeholder="Kosongkan jika PIN tidak diganti"
-                        inputmode="numeric"
-                        autocomplete="new-password"
-                        onkeydown="
-                            if(event.key === 'Enter'){
-                                event.preventDefault();
-                                saveEdit();
-                            }
-                        "
-                    >
-
-                    <div class="pin-description">
-                        Kosongkan jika PIN tidak ingin
-                        diganti.
-                        <br>
-                        Jika diisi, PIN lama tidak dapat
-                        digunakan lagi.
-                    </div>
-
-                </div>
-
-
-                <!-- ================================= -->
-                <!-- TOMBOL -->
-                <!-- ================================= -->
-
-                <button
-                    class="button button-primary"
-                    id="editSaveButton"
-                    onclick="saveEdit()"
-                >
-                    SIMPAN PERUBAHAN
-                </button>
-
-            </div>
-        `;
-
+		// FORM EDIT
+		// =========================================
+		
+		content.innerHTML = `
+		    <div class="message">
+		
+		        <div class="setting-title">
+		            Edit Plakat
+		        </div>
+		
+		        <div
+		            class="form-error"
+		            id="editError"
+		        ></div>
+		
+		
+		        <!-- ================================= -->
+		        <!-- INFORMASI TOKO -->
+		        <!-- ================================= -->
+		
+		        <div
+		            style="
+		                text-align:left;
+		                background:#f5f5f5;
+		                border-radius:10px;
+		                padding:14px;
+		                margin-bottom:18px;
+		            "
+		        >
+		
+		            <div
+		                style="
+		                    font-size:12px;
+		                    color:#888;
+		                    margin-bottom:4px;
+		                "
+		            >
+		                INFORMASI TOKO
+		            </div>
+		
+		            <div
+		                style="
+		                    font-size:17px;
+		                    font-weight:600;
+		                    margin-bottom:6px;
+		                "
+		            >
+		                ${escapeHtml(data.nama_usaha || "")}
+		            </div>
+		
+		            <div
+		                style="
+		                    font-size:13px;
+		                    color:#666;
+		                    line-height:1.5;
+		                "
+		            >
+		                ${escapeHtml(data.alamat || "")}
+		            </div>
+		
+		        </div>
+		
+		
+		        <!-- ================================= -->
+		        <!-- GOOGLE MAPS -->
+		        <!-- ================================= -->
+		
+		        <div class="form-group">
+		
+		            <label for="editNama">
+		                Ganti lokasi Google Maps
+		            </label>
+		
+		            <input
+		                type="text"
+		                id="editNama"
+		                value="${escapeHtml(data.nama_usaha || "")}"
+		                placeholder="Cari nama usaha"
+		                autocomplete="off"
+		            >
+		
+		            <div
+		                id="editPlaceResults"
+		                class="place-results"
+		            ></div>
+		
+		        </div>
+		
+		
+		        <!-- ================================= -->
+		        <!-- QR CODE -->
+		        <!-- ================================= -->
+		
+		        <div
+		            style="
+		                text-align:center;
+		                margin:20px 0;
+		            "
+		        >
+		
+		            <div
+		                style="
+		                    font-size:14px;
+		                    font-weight:600;
+		                    margin-bottom:10px;
+		                "
+		            >
+		                QR Code
+		            </div>
+		
+		            <img
+		                id="editQRCode"
+		                src="${escapeHtml(data.qrcode || "")}"
+		                alt="QR Code"
+		                style="
+		                    width:180px;
+		                    height:180px;
+		                    object-fit:contain;
+		                    display:block;
+		                    margin:0 auto 12px;
+		                    border:1px solid #eee;
+		                    border-radius:8px;
+		                "
+		            >
+		
+		            <button
+		                type="button"
+		                class="button button-secondary"
+		                onclick="downloadQRCode()"
+		            >
+		                DOWNLOAD QR CODE
+		            </button>
+		
+		        </div>
+		
+		
+		        <!-- ================================= -->
+		        <!-- PIN BARU -->
+		        <!-- ================================= -->
+		
+		        <div class="form-group">
+		
+		            <label for="editNewPin">
+		                PIN baru
+		            </label>
+		
+		            <input
+		                type="password"
+		                id="editNewPin"
+		                placeholder="Kosongkan jika tidak ingin mengganti PIN"
+		                inputmode="numeric"
+		                autocomplete="new-password"
+		                onkeydown="if(event.key === 'Enter'){
+		                    event.preventDefault();
+		                    saveEdit();
+		                }"
+		            >
+		
+		            <div class="pin-description">
+		                Kosongkan jika PIN tidak ingin diubah.
+		                Jika Anda memasukkan PIN baru,
+		                PIN lama tidak dapat digunakan lagi.
+		            </div>
+		
+		        </div>
+		
+		
+		        <!-- ================================= -->
+		        <!-- TOMBOL -->
+		        <!-- ================================= -->
+		
+		        <button
+		            class="button button-primary"
+		            id="editSaveButton"
+		            onclick="saveEdit()"
+		        >
+		            SIMPAN PERUBAHAN
+		        </button>
+		
+		    </div>
+		`;
         // =========================================
         // AKTIFKAN PENCARIAN GOOGLE MAPS
         // =========================================
@@ -1531,15 +1559,16 @@ async function showEditForm() {
 async function saveEdit() {
 
     const namaUsaha =
-        document.getElementById("editNama")
-            .value
-            .trim();
-
-    const placeId =
-        window.selectedEditPlace?.placeId || "";
+        window.selectedEditPlace?.nama ||
+        document.getElementById("editNama").value.trim();
 
     const alamat =
-        window.selectedEditPlace?.alamat || "";
+        window.selectedEditPlace?.alamat ||
+        "";
+
+    const placeId =
+        window.selectedEditPlace?.placeId ||
+        "";
 
     const newPin =
         document.getElementById("editNewPin")
@@ -1832,6 +1861,69 @@ function showEditSuccess(result) {
         }
     }, 1000);
 }
+
+async function downloadQRCode() {
+
+    const qrElement =
+        document.getElementById("editQRCode");
+
+    if (!qrElement || !qrElement.src) {
+        alert("QR Code tidak tersedia.");
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(qrElement.src);
+
+        if (!response.ok) {
+            throw new Error(
+                "QR Code tidak dapat diambil."
+            );
+        }
+
+        const blob =
+            await response.blob();
+
+        const url =
+            URL.createObjectURL(blob);
+
+        const link =
+            document.createElement("a");
+
+        link.href = url;
+
+        link.download =
+            "QR-Code-Plakat-" +
+            plakatId +
+            ".png";
+
+        document.body.appendChild(link);
+
+        link.click();
+
+        document.body.removeChild(link);
+
+        URL.revokeObjectURL(url);
+
+    } catch (error) {
+
+        console.error(
+            "Download QR error:",
+            error
+        );
+
+        // Fallback:
+        // buka QR di tab baru
+        window.open(
+            qrElement.src,
+            "_blank"
+        );
+
+    }
+}
+	
 function confirmPinChange() {
     const data = window.pendingEdit;
     if (!data) {
