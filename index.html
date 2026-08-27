@@ -314,6 +314,7 @@
 		}
     </style>
 	<script
+		const currentOrigin = window.location.origin;
 	    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAnthbTl0zHrF8PGobNyIlo8lFWv7AtVYk&libraries=places&loading=async"
 	    async>
 	</script>
@@ -369,10 +370,11 @@ if (!plakatId) {
 // =====================================================
 async function getPlakat() {
     try {
-        const response = await fetch(
+       const response = await fetch(
             API_URL +
             "?action=get&id=" +
-            encodeURIComponent(plakatId)
+            encodeURIComponent(plakatId) +
+            "&origin=" + encodeURIComponent(currentOrigin)
         );
         const data = await response.json();
         if (data.status === "not_found") {
@@ -1025,7 +1027,7 @@ async function registerPlakat() {
 	};
 	try {
         const response =
-            await fetch(API_URL, {
+            await fetch(API_URL + "?origin=" + encodeURIComponent(currentOrigin), {
                 method: "POST",
                 headers: {
                     "Content-Type":
@@ -1259,7 +1261,7 @@ async function verifyPin() {
         "MEMERIKSA...";
 	try {
         const response =
-            await fetch(API_URL, {
+            await fetch(API_URL + "?origin=" + encodeURIComponent(currentOrigin), {
                 method: "POST",
                 headers: {
                     "Content-Type":
@@ -1696,7 +1698,7 @@ async function saveEditToServer(
     console.log("Mengirim data edit...");
     try {
         const response =
-            await fetch(API_URL, {
+            await fetch(API_URL + "?origin=" + encodeURIComponent(currentOrigin), {
                 method: "POST",
                 headers: {
                     "Content-Type":
