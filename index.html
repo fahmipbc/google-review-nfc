@@ -335,7 +335,7 @@
 // KONFIGURASI
 // =====================================================
 const API_URL =
-    "https://script.google.com/macros/s/AKfycbySSJ0dGfVTD7A8Olvkkmi_RMbu3UVeYd6Gxlo6hPfDHPFyyVl5huz1HwIHO9Rly2XI/exec";
+    "https://google-review-api.amgeoid-id.workers.dev/";
 // AMBIL ID PLAKAT
 const params = new URLSearchParams(
     window.location.search
@@ -415,7 +415,6 @@ function showRegistrationForm(data) {
             <div class="setup-title">
                 Konfigurasi Plakat
             </div>
-            <div class="form-error" id="formError"></div>
             <div class="form-group">
 			    <label for="namaUsaha">
 			        Nama usaha
@@ -433,7 +432,7 @@ function showRegistrationForm(data) {
 			        class="place-results"
 			    ></div>
 			</div>
-            <div class="form-group">
+                        <div class="form-group">
                 <label for="userPin">
                     PIN
                 </label>
@@ -450,6 +449,20 @@ function showRegistrationForm(data) {
                     mengubah konfigurasi plakat nanti.
                 </div>
             </div>
+            <div class="form-group">
+                <label for="userPinConfirm">
+                    Konfirmasi PIN
+                </label>
+                <input
+                    type="password"
+                    id="userPinConfirm"
+                    placeholder="Ketik ulang PIN"
+                    inputmode="numeric"
+                    autocomplete="new-password"
+                    onkeydown="if(event.key === 'Enter'){ event.preventDefault(); registerPlakat(); }"
+                >
+            </div>
+            <div class="form-error" id="formError"></div>
             <button
                 class="button button-primary"
                 id="saveButton"
@@ -971,6 +984,10 @@ async function registerPlakat() {
         document.getElementById("userPin")
             .value
             .trim();
+    const pinConfirm =
+        document.getElementById("userPinConfirm")
+            .value
+            .trim();
     // =============================================
     // VALIDASI
     // =============================================
@@ -989,6 +1006,12 @@ async function registerPlakat() {
     if (!pin) {
         showFormError(
             "PIN belum diisi."
+        );
+        return;
+    }
+    if (pin !== pinConfirm) {
+        showFormError(
+            "Konfirmasi PIN tidak cocok."
         );
         return;
     }
@@ -1097,14 +1120,10 @@ function showRegistrationSuccess(data) {
                     Konfigurasi berhasil
                 </div>
                 <div class="business-name">
-                    ${escapeHtml(
-                        data.nama_usaha
-                    )}
+                    ${escapeHtml(data.nama_usaha)}
                 </div>
                 <div class="address">
-                    ${escapeHtml(
-                        data.alamat
-                    )}
+                    ${escapeHtml(data.alamat)}
                 </div>
                 <div style="
                     margin-top:20px;
@@ -1114,15 +1133,33 @@ function showRegistrationSuccess(data) {
                     Plakat ini sekarang sudah
                     siap digunakan.
                 </div>
-                <div class="setup-id">
-                    ID Plakat:
-                    ${escapeHtml(
-                        data.id_plakat
-                    )}
+                <div class="countdown">
+                    Membuka Google Review dalam
+                    <strong id="regSuccessSeconds">2</strong>
+                    detik
                 </div>
             </div>
         </div>
     `;
+    let seconds = 2;
+    const countdown = setInterval(function () {
+        seconds--;
+        const element =
+            document.getElementById("regSuccessSeconds");
+        if (!element) {
+            clearInterval(countdown);
+            return;
+        }
+        if (seconds > 0) {
+            element.textContent = seconds;
+            return;
+        }
+        clearInterval(countdown);
+        const reviewUrl =
+            "https://search.google.com/local/writereview?placeid=" +
+            encodeURIComponent(data.place_id);
+        window.location.href = reviewUrl;
+    }, 1000);
 }
 // =====================================================
 // REDIRECT
@@ -1362,13 +1399,7 @@ async function showEditForm() {
 		        <div class="setting-title">
 		            Edit Plakat
 		        </div>
-		
-		        <div
-		            class="form-error"
-		            id="editError"
-		        ></div>
-		
-		
+				
 		        <!-- ================================= -->
 		        <!-- INFORMASI TOKO -->
 		        <!-- ================================= -->
@@ -1439,6 +1470,11 @@ async function showEditForm() {
 		                class="place-results"
 		            ></div>
 		
+		            <div
+		                id="editSelectedPlace"
+		                style="display:none;"
+		            ></div>
+		
 		        </div>
 		
 		
@@ -1492,9 +1528,8 @@ async function showEditForm() {
 		        <!-- ================================= -->
 		        <!-- PIN BARU -->
 		        <!-- ================================= -->
-		
 		        <div class="form-group">
-		
+
 		            <label for="editNewPin">
 		                PIN baru
 		            </label>
@@ -1505,6 +1540,7 @@ async function showEditForm() {
 		                placeholder="Kosongkan jika tidak ingin mengganti PIN"
 		                inputmode="numeric"
 		                autocomplete="new-password"
+		                oninput="toggleEditPinConfirm()"
 		                onkeydown="if(event.key === 'Enter'){
 		                    event.preventDefault();
 		                    saveEdit();
@@ -1519,11 +1555,30 @@ async function showEditForm() {
 		
 		        </div>
 		
+		    	<div class="form-group" id="editNewPinConfirmGroup" style="display:none;">
+		            <label for="editNewPinConfirm">
+		                Konfirmasi PIN baru
+		            </label>
+		            <input
+		                type="password"
+		                id="editNewPinConfirm"
+		                placeholder="Ketik ulang PIN baru"
+		                inputmode="numeric"
+		                autocomplete="new-password"
+		                onkeydown="if(event.key === 'Enter'){
+		                    event.preventDefault();
+		                    saveEdit();
+		                }"
+		            >
+		        </div>
 		
 		        <!-- ================================= -->
 		        <!-- TOMBOL -->
 		        <!-- ================================= -->
-		
+		        <div
+		            class="form-error"
+		            id="editError"
+		        ></div>
 		        <button
 		            class="button button-primary"
 		            id="editSaveButton"
@@ -1556,6 +1611,26 @@ async function showEditForm() {
         `;
     }
 }
+function toggleEditPinConfirm() {
+    const pinInput =
+        document.getElementById("editNewPin");
+    const confirmGroup =
+        document.getElementById("editNewPinConfirmGroup");
+    const confirmInput =
+        document.getElementById("editNewPinConfirm");
+
+    if (!pinInput || !confirmGroup) {
+        return;
+    }
+    if (pinInput.value.trim() !== "") {
+        confirmGroup.style.display = "block";
+    } else {
+        confirmGroup.style.display = "none";
+        if (confirmInput) {
+            confirmInput.value = "";
+        }
+    }
+}
 async function saveEdit() {
 
     const namaUsaha =
@@ -1570,11 +1645,15 @@ async function saveEdit() {
         window.selectedEditPlace?.placeId ||
         "";
 
-    const newPin =
+        const newPin =
         document.getElementById("editNewPin")
             .value
             .trim();
 
+    const newPinConfirm =
+        document.getElementById("editNewPinConfirm")
+            .value
+            .trim();
 
     // =========================================
     // VALIDASI GOOGLE MAPS
@@ -1613,28 +1692,25 @@ async function saveEdit() {
     // =========================================
     // VALIDASI PIN BARU
     // =========================================
-
     if (newPin !== "") {
-
+        if (newPin !== newPinConfirm) {
+            showEditError(
+                "Konfirmasi PIN baru tidak cocok."
+            );
+            return;
+        }
         if (!/^\d+$/.test(newPin)) {
-
             showEditError(
                 "PIN baru hanya boleh berisi angka."
             );
-
             return;
         }
-
-
         if (newPin.length < 4) {
-
             showEditError(
                 "PIN baru minimal 4 angka."
             );
-
             return;
         }
-
 
         // =====================================
         // SIMPAN DATA SEMENTARA
